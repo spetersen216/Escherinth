@@ -63,4 +63,19 @@ public struct Point3 {
 	public override string ToString() {
 		return "("+x+", "+y+", "+z+")";
 	}
+	public static Point3 operator +(Point3 p1, Point3 p2) {
+		return new Point3(p1.x+p2.x, p1.y+p2.y, p1.z+p2.z);
+	}
+	
+	public static Point3 operator +(Point3 p1, int i) {
+		return (p1 + new Point3(i, i, i));
+	}
+	
+	public static Point3 operator -(Point3 p1, Point3 p2) {
+		return new Point3(p1.x-p2.x, p1.y-p2.y, p1.z-p2.z);
+	}
+	
+	public static Point3 operator -(Point3 p1, int i) {
+		return (p1 - new Point3(i, i, i));
+	}
 }
