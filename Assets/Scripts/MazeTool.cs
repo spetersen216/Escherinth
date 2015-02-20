@@ -357,12 +357,10 @@ public class MazeTool:MonoBehaviour {
 		// check if activeGameObject is a wall or a floor that has a corresponding wall
 		if (activeGameObject!=null && activeGameObject.transform.parent!=null &&
 			activeGameObject.transform.parent.parent==transform)
-
+			print("hello");
 			for (int i=0; i<cells.GetLength(0); ++i)
 				for (int j=0; j<cells.GetLength(1); ++j)
-					if (activeGameObject==walls[i, j] ||
-						(activeGameObject==cells[i, j] && walls[i, j]!=null)) {
-
+					if (walls[i, j]!=null && activeGameObject==cells[i, j].gameObject) {
 						ToggleWall(i, j);
 						activeGameObject = (focusOnThis?gameObject:null);
 						return;
