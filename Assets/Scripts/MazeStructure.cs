@@ -9,7 +9,10 @@ public class MazeStructure {
 	public MazeStructure(MazeTool mt) {
 		// initialize data
 		data = new bool[2+mt.walls.GetLength(0), 3, 2+mt.walls.GetLength(1)];
-		data.Initialize();
+		for (int i=0; i<data.GetLength(0); ++i)
+			for (int j=0; j<data.GetLength(1); ++j)
+				for (int k=0; k<data.GetLength(2); ++k)
+					data[i, j, k] = true;
 
 		// parse MazeTool walls, cells
 		for (int i=0; i<mt.walls.GetLength(0); ++i) {
@@ -35,11 +38,11 @@ public class MazeStructure {
 		return new Pathfinding(data, pos);
 	}
 	
-	public Vector3 FromCubeToSphere(Vector3 v) {
+	public static Vector3 FromCubeToSphere(Vector3 v, float radius) {
 		return v;
 	}
 	
-	public Vector3 FromSphereToCube(Vector3 v) {
+	public static Vector3 FromSphereToCube(Vector3 v, float radius) {
 		return v;
 	}
 	

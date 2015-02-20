@@ -39,6 +39,9 @@ public class MazeTool:MonoBehaviour {
 	public bool resetMaze=false;
 	public bool clearMaze=false;
 	public bool generateMaze=false;
+	public bool pathFind=false;
+	public bool pathFindToPos=false;
+	public bool resetPathFind=false;
 
 	// string variables
 	public static int version=0;
@@ -154,6 +157,12 @@ public class MazeTool:MonoBehaviour {
 			ClearMaze();
 		if (generateMaze)
 			GenerateMaze();
+		if (pathFind)
+			PathFind();
+		if (pathFindToPos)
+			PathFindToPos();
+		if (resetPathFind)
+			ResetPathFind();
 
 		// parse string
 		if (toString!=_toString) {
@@ -177,9 +186,12 @@ public class MazeTool:MonoBehaviour {
 				walls[p.x, p.y].FromString(split[3].Substring(wallLength*(wallIndex++), wallLength), version);
 
 			// update all cells
-			for (int i=0; i<cells.GetLength(0); i+=2) {
-				for (int j=0; j<cells.GetLength(1); j+=2) {
-					cells[i, j].FromString(split[4].Substring(cellLength*(cellIndex++), cellLength), version);
+			for (int i=0; i<cells.GetLength(0); ++i) {
+				for (int j=0; j<cells.GetLength(1); ++j) {
+					if (walls[i, j]==null && cells[i, j]!=null)
+						cells[i, j].FromString(split[4].Substring(cellLength*(cellIndex++), cellLength), version);
+					else if (cells[i, j]!=null)
+						cells[i, j].renderer.sharedMaterial = (walls[i, j].gameObject.activeSelf?wallMaterial:defaultDiffuse);
 				}
 			}
 		}
@@ -522,5 +534,39 @@ public class MazeTool:MonoBehaviour {
 
 	private void StoreString() {
 		toString = _toString = ToString();
+	}
+
+	private void PathFind() {
+		pathFind = false;
+		Pathfinding path = new MazeStructure(this).Pathfind(new Point3(1, 1, 1));
+		for (int i=0; i<cells.GetLength(0); i+=2) {
+			for (int j=0; j<cells.GetLength(1); j+=2) {
+				Vector3 v = cells[i, j].transform.localPosition;
+				cells[i, j].transform.localPosition = new Vector3(v.x, path.GetGamePos(new Point3(1+i/2, 1, 1+j/2)), v.z);
+			}
+		}
+	}
+
+	private void PathFindToPos() {
+		pathFindToPos = false;
+		Pathfinding path = new MazeStructure(this).Pathfind(new Point3(1, 1, 1));
+		Point3[] pathToPoint = path.PathToPoint(new Point3(width, 1, height));
+		print("path length: "+pathToPoint.Length);
+		for (int i=0; i<pathToPoint.Length; ++i) {
+			Point3 pos = MazeStructure.Point3FromGameToData(new Point3[] { pathToPoint[i] })-1;
+			print("point: "+pos);
+			Vector3 v = cells[pos.x, pos.z].transform.localPosition;
+			cells[pos.x, pos.z].transform.localPosition = new Vector3(v.x, i, v.z);
+		}
+	}
+
+	private void ResetPathFind() {
+		resetPathFind = false;
+		for (int i=0; i<cells.GetLength(0); i+=2) {
+			for (int j=0; j<cells.GetLength(1); j+=2) {
+				Vector3 v = cells[i, j].transform.localPosition;
+				cells[i, j].transform.localPosition = new Vector3(v.x, 0, v.z);
+			}
+		}
 	}
 }

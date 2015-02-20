@@ -149,7 +149,9 @@ public struct Point3 {
 			this+up,
 			this+down,
 			this+left,
-			this+right
+			this+right,
+			this+forward,
+			this+back
 		};
 	}
 
@@ -161,7 +163,9 @@ public struct Point3 {
 			this+(up*offset),
 			this+(down*offset),
 			this+(left*offset),
-			this+(right*offset)
+			this+(right*offset),
+			this+(forward*offset),
+			this+(back*offset)
 		};
 	}
 
