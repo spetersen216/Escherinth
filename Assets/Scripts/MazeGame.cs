@@ -3,45 +3,22 @@ using System.Collections;
 
 public class MazeGame : MonoBehaviour {
 
-	private GameObject maze;
+	public MazeTool Maze;
 	private GameObject key;
 	private GameObject door;
-	private GameObject rig;
+	private GameObject player;
 	private GameObject plane;
-	private CharacterController char_control;
-	private OVRGamepadController control;
-	private OVRPlayerController player_control;
-	private OVRMainMenu menu ;
+	public OVRPlayerController player_control;
+	private OVRMainMenu menu;
+	private bool inMenu = false;
 
 	// Use this for initialization
 	void Start () {
 		//call for start menu
 
-		//create/import maze
-		plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
-		plane.transform.position = new Vector3 (0, -1, 0);
-		rig = new GameObject();
-		char_control = rig.AddComponent<CharacterController>();
-		control = rig.AddComponent <OVRGamepadController>();
-		player_control = rig.AddComponent <OVRPlayerController>();
-		//rig.AddComponent <OVRMainMenu>();
+		//create maze objects
+		createObjects ();
 
-	
-	
-		//add in OVR player controller 
-		/*control = GetComponent<OVRGamepadController> ();
-		player_control = GetComponent<OVRPlayerController> ();
-		menu = GetComponent<OVRMainMenu> ();
-		char_control = GetComponent<CharacterController> ();
-*/
-		/*rig.AddComponent (Transform);
-		rig.AddComponent (control);
-		rig.AddComponent (player_control);
-		rig.AddComponent (char_control);
-		rig.AddComponent (menu);
-*/
-
-	
 		//add key
 		//add door 
 		//lights
@@ -51,5 +28,20 @@ public class MazeGame : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
+	}
+
+
+	private void createObjects(){
+	
+		plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
+		plane.transform.position = new Vector3 (0, 1, 0);
+		plane.transform.localScale = new Vector3 (30, 30, 30);
+		Instantiate (player_control, new Vector3 (0, 3, 0), Quaternion.identity);
+		Instantiate (Maze, new Vector3 (0, 0, 0), Quaternion.identity);
+		Maze.transform.localScale = new Vector3 (10,10,10);
+		menu = player_control.GetComponent<OVRMainMenu> ();
+		menu.enabled = true;
+		//menu.
+		inMenu = true;
 	}
 }
