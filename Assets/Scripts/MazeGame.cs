@@ -39,8 +39,8 @@ public class MazeGame : MonoBehaviour {
 		Instantiate (player_control, new Vector3 (0, 3, 0), Quaternion.identity);
 		Instantiate (Maze, new Vector3 (0, 0, 0), Quaternion.identity);
 		Maze.transform.localScale = new Vector3 (10,10,10);
-		menu = player_control.GetComponent<OVRMainMenu> ();
-		menu.enabled = true;
+		//menu = player_control.GetComponent<OVRMainMenu> ();
+		//menu.enabled = true;
 		//menu.
 		inMenu = true;
 	}
