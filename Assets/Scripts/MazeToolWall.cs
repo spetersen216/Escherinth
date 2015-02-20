@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class MazeToolWall : MonoBehaviour {
+public class MazeToolWall:MazeToolComponent {
 	
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	public enum WallType {normal, door};

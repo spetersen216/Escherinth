@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class MazeToolCell:MonoBehaviour {
+public class MazeToolCell:MazeToolComponent {
 
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	public enum CellType { normal, key };

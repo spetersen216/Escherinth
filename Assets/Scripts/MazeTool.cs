@@ -16,10 +16,10 @@ public class MazeTool:MonoBehaviour {
 	public int width=10;
 	public int height=10;
 	public MazeToolWall[,] walls;
-	private MazeToolCell[,] cells;
-	private Transform wallContainer;
-	private Transform cellContainer;
-	private Transform border;
+	public MazeToolCell[,] cells;
+	public Transform wallContainer;
+	public Transform cellContainer;
+	public Transform border;
 
 	// display variables
 	public bool focusOnThis=true;
@@ -138,7 +138,7 @@ public class MazeTool:MonoBehaviour {
 		result.name = "wall "+i+" "+j+" (active)";
 		result.transform.parent = wallContainer;
 		result.transform.localPosition = new Vector3(i+0.5f, 0.25f, j+0.5f);
-		result.transform.localScale = (i%2==0?new Vector3(2f, 0.5f, 0.1f):new Vector3(0.1f, 0.5f, 2f));
+		result.transform.localScale = (i%2==0?new Vector3(2.1f, 0.5f, 0.1f):new Vector3(0.1f, 0.5f, 2.1f));
 		result.renderer.sharedMaterial = wallMaterial;
 		return result.AddComponent<MazeToolWall>();
 	}
@@ -356,15 +356,17 @@ public class MazeTool:MonoBehaviour {
 	void OnRenderObject() {
 		// check if activeGameObject is a wall or a floor that has a corresponding wall
 		if (activeGameObject!=null && activeGameObject.transform.parent!=null &&
-			activeGameObject.transform.parent.parent==transform)
-			print("hello");
-			for (int i=0; i<cells.GetLength(0); ++i)
-				for (int j=0; j<cells.GetLength(1); ++j)
+			activeGameObject.transform.parent.parent==transform) {
+			for (int i=0; i<cells.GetLength(0); ++i) {
+				for (int j=0; j<cells.GetLength(1); ++j) {
 					if (walls[i, j]!=null && activeGameObject==cells[i, j].gameObject) {
 						ToggleWall(i, j);
 						activeGameObject = (focusOnThis?gameObject:null);
 						return;
 					}
+				}
+			}
+		}
 	}
 
 	private void ToggleWall(int i, int j) {
@@ -383,8 +385,10 @@ public class MazeTool:MonoBehaviour {
 
 	/// <summary>
 	/// Turns off each wall.
+	/// Removes all special walls/cells.
 	/// </summary>
 	public void ClearMaze() {
+		ResetMaze();
 		clearMaze = false;
 
 		for (int i=0; i<walls.GetLength(0); ++i)
@@ -395,18 +399,26 @@ public class MazeTool:MonoBehaviour {
 
 	/// <summary>
 	/// Turns on each wall.
+	/// Removes all special walls/cells.
 	/// </summary>
 	public void ResetMaze() {
 		resetMaze = false;
 
-		for (int i=0; i<walls.GetLength(0); ++i)
-			for (int j=0; j<walls.GetLength(1); ++j)
+		for (int i=0; i<walls.GetLength(0); ++i) {
+			for (int j=0; j<walls.GetLength(1); ++j) {
 				if (walls[i, j]!=null && !walls[i, j].gameObject.activeSelf)
 					ToggleWall(i, j);
+				if (walls[i, j]!=null)
+					walls[i, j].type = MazeToolWall.WallType.normal;
+				if (cells[i, j]!=null)
+					cells[i, j].type = MazeToolCell.CellType.normal;
+			}
+		}
 	}
 
 	/// <summary>
 	/// Generates a random maze using basic depth first maze generation.
+	/// Removes all special walls and cells
 	/// </summary>
 	public void GenerateMaze() {
 		generateMaze = false;
