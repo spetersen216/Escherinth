@@ -59,10 +59,21 @@ public struct Point3 {
 		this.y = p.y;
 		this.z = 0;
 	}
+	
+	public Point3(Vector3 v) {
+		this.x = (int)v.x;
+		this.y = (int)v.y;
+		this.z = (int)v.z;
+	}
 
 	public override string ToString() {
 		return "("+x+", "+y+", "+z+")";
 	}
+	
+	public Vector3 ToVector3() {
+		return new Vector3(x, y, z);
+	}
+	
 	public static Point3 operator +(Point3 p1, Point3 p2) {
 		return new Point3(p1.x+p2.x, p1.y+p2.y, p1.z+p2.z);
 	}
