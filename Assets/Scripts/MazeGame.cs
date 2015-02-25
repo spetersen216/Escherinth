@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class MazeGame : MonoBehaviour {
 
-	public Maze maze;
+	public GameObject maze;
 	public LightSystem lights;
 	public string mazeToGenerate;
 	public Component[] comps;
@@ -45,29 +45,17 @@ public class MazeGame : MonoBehaviour {
 
 
 	private void createObjects(){
-		//map = new GameObject ("Map");
-		//plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
-		//plane.transform.SetParent (map.transform);
-		//plane.transform.position = new Vector3 (0, 1, 0);
 
-		Instantiate (key, new Vector3 (0, 0, 0), Quaternion.identity);
-		//key.tag = "collectable";
-		//Instantiate (lights, new Vector3 (85.4f, 125.9f, 242.1f), Quaternion.identity);
-		//lights.gameObject.transform.Rotate (new Vector3 (33.053f, 194.3891f, 335.2719f));
-		//Instantiate (maze, new Vector3 (488.9f, -304f, -274.2f), Quaternion.identity);
-		mazeObj = GameObject.Find ("Maze");
-		mazeTool = mazeObj.GetComponent<MazeTool> ();
-		//mazeTool.walls = GameObject.Find ("wall container");
-		//mazeTool.cells = GameObject.Find ("cell container");
-		//mazeTool.border = GameObject.Find ("border");
+		key = (GameObject)Instantiate(key, new Vector3 (0, 0, 0), Quaternion.identity);
+		lights = (GameObject)Instantiate(lights, new Vector3(85.4f,))
+		mazeTool = maze.GetComponent<MazeTool>();
 
 		//comps = mazeObj.GetComponents<Component>();
 
 		//foreach (Component c in comps) {
 		//	Debug.Log(c.ToString());
 		//}
-		//mazeTool = GameObject.Find (""+map.name).GetComponent<MazeTool>();
-		//mazeTool = (MazeTool)FindObjectOfType(typeof(MazeTool));
+
 		mazeStruct = new MazeStructure (mazeTool);
 //		Debug.Log ("" + map.name);	
 
@@ -81,6 +69,10 @@ public class MazeGame : MonoBehaviour {
 		right_cam.gameObject.AddComponent<Skybox> ().material = 
 			(Material)Resources.Load ("Overcast2 Skybox", typeof(Material));
 		walls = mazeTool.walls;
+
+		mazeStruct.FindKey ();
+		mazeStruct.FindDoor ();
+
 		//GameObject[] ws = Object.FindObjectsOfType (typeof(MazeToolWall)) as GameObject[];
 		/*string[] names = new string[100];
 		for (int i = 0; i < mazeTool.width+9; i++) {
