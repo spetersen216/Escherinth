@@ -4,7 +4,11 @@ using UnityEngine.UI;
 
 public class MazeGame : MonoBehaviour {
 
-	public GameObject maze;
+	public Maze maze;
+	public LightSystem lights;
+	public string mazeToGenerate;
+	public Component[] comps;
+	private GameObject mazeObj;
 	private MazeTool mazeTool;
 	public IEnumerable walls;
 	public Key key;
@@ -48,12 +52,23 @@ public class MazeGame : MonoBehaviour {
 
 		Instantiate (key, new Vector3 (0, 0, 0), Quaternion.identity);
 		//key.tag = "collectable";
+		//Instantiate (lights, new Vector3 (85.4f, 125.9f, 242.1f), Quaternion.identity);
+		//lights.gameObject.transform.Rotate (new Vector3 (33.053f, 194.3891f, 335.2719f));
+		//Instantiate (maze, new Vector3 (488.9f, -304f, -274.2f), Quaternion.identity);
+		mazeObj = GameObject.Find ("Maze");
+		mazeTool = mazeObj.GetComponent<MazeTool> ();
+		//mazeTool.walls = GameObject.Find ("wall container");
+		//mazeTool.cells = GameObject.Find ("cell container");
+		//mazeTool.border = GameObject.Find ("border");
 
-		//map = Instantiate (maze, new Vector3 (488.9f, -304f, -274.2f), Quaternion.identity) as GameObject;
-		maze = GameObject.Find ("Maze");
+		//comps = mazeObj.GetComponents<Component>();
+
+		//foreach (Component c in comps) {
+		//	Debug.Log(c.ToString());
+		//}
 		//mazeTool = GameObject.Find (""+map.name).GetComponent<MazeTool>();
-		mazeTool = (MazeTool)FindObjectOfType(typeof(MazeTool));
-		//mazeStruct = new MazeStructure (mazeTool);
+		//mazeTool = (MazeTool)FindObjectOfType(typeof(MazeTool));
+		mazeStruct = new MazeStructure (mazeTool);
 //		Debug.Log ("" + map.name);	
 
 		//plane.transform.position = new Vector3(50,1,50);
@@ -65,13 +80,12 @@ public class MazeGame : MonoBehaviour {
 			(Material)Resources.Load ("Overcast2 Skybox", typeof(Material));
 		right_cam.gameObject.AddComponent<Skybox> ().material = 
 			(Material)Resources.Load ("Overcast2 Skybox", typeof(Material));
-		/*walls = mazeTool.walls;
+		walls = mazeTool.walls;
 		//GameObject[] ws = Object.FindObjectsOfType (typeof(MazeToolWall)) as GameObject[];
-		string[] names = new string[100];
+		/*string[] names = new string[100];
 		for (int i = 0; i < mazeTool.width+9; i++) {
 			for (int j = 0; j < mazeTool.width+9; j++) {
 				string s = "wall " + i + " " + j;
-				names[j] = s;
 			}
 		}
 		GameObject[] w = new GameObject[100];
@@ -79,6 +93,7 @@ public class MazeGame : MonoBehaviour {
 		foreach (string s in names) {
 			w[count] = GameObject.Find (s);
 			count++;
+			Debug.Log (s);
 		}*/
 		//Debug.Log(""+ mazeStruct.FindKey().ToString());
 		//key.transform.position.Set (mazeStruct.FindKey().x, mazeStruct.FindKey().y, mazeStruct.FindKey().z);
