@@ -52,10 +52,8 @@ public class MazeStructure {
 		return mazeTool.walls[door.x, door.y].gameObject;
 	}
 	
-	public GameObject GetKey() {
-		GameObject result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		result.transform.position = key.ToVector3()+(Vector3.one/2);
-		return result;
+	public Vector3 GetKeyLocation() {
+		return key.ToVector3()+(Vector3.one/2);
 	}
 
 	public void FindDoor() { }
