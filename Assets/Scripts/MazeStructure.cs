@@ -2,31 +2,33 @@
 using System.Collections;
 
 public class MazeStructure {
+	private MazeTool mazeTool;
 	private bool[,,] data;
 	private Point3 door;
 	private Point3 key;
 	
-	public MazeStructure(MazeTool mt) {
+	public MazeStructure(MazeTool mazeTool) {
 		// initialize data
-		data = new bool[2+mt.walls.GetLength(0), 3, 2+mt.walls.GetLength(1)];
+		this.mazeTool = mazeTool;
+		data = new bool[2+mazeTool.walls.GetLength(0), 3, 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
 			for (int j=0; j<data.GetLength(1); ++j)
 				for (int k=0; k<data.GetLength(2); ++k)
 					data[i, j, k] = true;
 
 		// parse MazeTool walls, cells
-		for (int i=0; i<mt.walls.GetLength(0); ++i) {
-			for (int j=0; j<mt.walls.GetLength(1); ++j) {
+		for (int i=0; i<mazeTool.walls.GetLength(0); ++i) {
+			for (int j=0; j<mazeTool.walls.GetLength(1); ++j) {
 				// parse walls
-				if (mt.walls[i, j]!=null) {
-					data[1+i, 1, 1+j] = mt.walls[i, j].gameObject.activeSelf;
-					if (mt.walls[i, j].type==MazeToolWall.WallType.door)
+				if (mazeTool.walls[i, j]!=null) {
+					data[1+i, 1, 1+j] = mazeTool.walls[i, j].gameObject.activeSelf;
+					if (mazeTool.walls[i, j].type==MazeToolWall.WallType.door)
 						door = new Point3(1+i, 1, 1+j);
 				}
 
 				// parse cells
-				else if (mt.cells[i, j]!=null) {
-					if (mt.cells[i, j].type==MazeToolCell.CellType.key)
+				else if (mazeTool.cells[i, j]!=null) {
+					if (mazeTool.cells[i, j].type==MazeToolCell.CellType.key)
 						key = new Point3(1+i, 1, 1+j);
 				}
 			}
@@ -46,12 +48,35 @@ public class MazeStructure {
 		return v;
 	}
 	
-	public Point3[] FindDoor() {
-		return Point3FromDataToGame(door);
+	public GameObject GetDoor() {
+		return mazeTool.walls[door.x, door.y].gameObject;
 	}
 	
-	public Point3 FindKey() {
-		return Point3FromDataToGame(key)[0];
+	public GameObject GetKey() {
+		GameObject result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		result.transform.position = key.ToVector3()+(Vector3.one/2);
+		return result;
+	}
+
+	public void FindDoor() { }
+	public void FindKey() { }
+
+	public GameObject GetWalls() {
+		return (GameObject)Object.Instantiate(mazeTool.wallContainer.gameObject);
+	}
+
+	public Light[,] GetLights(Light l) {
+		Light[,] result = new Light[mazeTool.width, mazeTool.height];
+		GameObject container = new GameObject("lights");
+		for (int i=0; i<mazeTool.cells.GetLength(0); ++i) {
+			for (int j=0; j<mazeTool.cells.GetLength(1); ++j) {
+				GameObject light = (GameObject)Object.Instantiate(l.gameObject);
+				result[i, j] = light.GetComponent<Light>();
+				light.transform.position = new Vector3(i+0.5f, 1, j+0.5f);
+				light.transform.parent = container.transform;
+			}
+		}
+		return result;
 	}
 
 	/// <summary>

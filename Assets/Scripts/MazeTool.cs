@@ -342,6 +342,13 @@ public class MazeTool:MonoBehaviour {
 		cellContainer.gameObject.SetActive(displayCells);
 		border.gameObject.SetActive(displayBorders);
 
+		// position wallContainer/cellContainer/border
+		wallContainer.transform.localPosition = new Vector3(0.25f, 0f, 0.25f);
+		cellContainer.transform.localPosition = new Vector3(0.25f, 0f, 0.25f);
+		border.transform.localPosition = new Vector3(0.25f, 0f, 0.25f);
+		wallContainer.transform.localScale = Vector3.one/2;
+		cellContainer.transform.localScale = Vector3.one/2;
+		border.transform.localScale = Vector3.one/2;
 
 		// if anything changed
 		/*if (// if anything is null
