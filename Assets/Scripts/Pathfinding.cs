@@ -7,6 +7,9 @@ public class Pathfinding {
 	private int[,,] data;
 	private bool[,,] walls;
 
+	/// <summary>
+	/// Takes a Point3 in Game coordinates
+	/// </summary>
 	public Pathfinding(bool[,,] walls, Point3 center) {
 		// initialize member variables
 		this.center = center;

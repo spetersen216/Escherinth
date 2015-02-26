@@ -30,27 +30,5 @@ public class CollectionMechanic : MonoBehaviour {
 		//CollectionText.text = "" + collectableCountCurrent + "/" + collectableCountTotal + " ITEMS COLLECTED";
 	}
 	
-	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
-	void OnTriggerEnter (Collider collider)
-	{
-		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
-		if (collider.tag == "collectable")
-		{
-			Debug.Log("Collision with collection");
-			// We want to increase our current collectable count by 1
-			collectableCountCurrent++;
-			// We also want to destroy the other actor, making it disapear
-			Destroy(collider.gameObject);
-			
-			// If we have collected all the objects on the level show the win text
-			if (collectableCountCurrent == collectableCountTotal){
-				//CollectionText.text = "ALL ITEMS COLLECTED!";
-			}
-			
-			// Otherwise update the HUD with the new collection total
-			else{
-				//CollectionText.text = "" + collectableCountCurrent + "/" + collectableCountTotal + " ITEMS COLLECTED";
-			}
-		}
-	}
+
 }

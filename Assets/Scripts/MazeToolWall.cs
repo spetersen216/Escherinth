@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 
+[Serializable]
 public class MazeToolWall:MazeToolComponent {
 	
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

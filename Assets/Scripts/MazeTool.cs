@@ -48,7 +48,7 @@ public class MazeTool:MonoBehaviour {
 	public string toString="";
 	private string _toString="";
 
-	void Start() {
+	public void Start() {
 		Update();
 	}
 

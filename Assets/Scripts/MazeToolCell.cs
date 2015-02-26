@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using UnityEditor;
 
+[Serializable]
 public class MazeToolCell:MazeToolComponent {
 
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -26,4 +28,8 @@ public class MazeToolCell:MazeToolComponent {
 			break;
 		}
 	}
+
+	/*void OnInspectorGUI() {
+		EditorGUILayout.Popup(
+	}*/
 }

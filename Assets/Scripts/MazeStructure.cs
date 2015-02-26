@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class MazeStructure {
 	private MazeTool mazeTool;
@@ -23,16 +24,18 @@ public class MazeStructure {
 				if (mazeTool.walls[i, j]!=null) {
 					data[1+i, 1, 1+j] = mazeTool.walls[i, j].gameObject.activeSelf;
 					if (mazeTool.walls[i, j].type==MazeToolWall.WallType.door)
-						door = new Point3(1+i, 1, 1+j);
+						door = new Point3(i, 1, j);
 				}
 
 				// parse cells
 				else if (mazeTool.cells[i, j]!=null) {
 					if (mazeTool.cells[i, j].type==MazeToolCell.CellType.key)
-						key = new Point3(1+i, 1, 1+j);
+						key = new Point3(i, 1, j);
 				}
 			}
 		}
+
+		Debug.Log("key is at "+key);
 
 	}
 
@@ -52,23 +55,29 @@ public class MazeStructure {
 		return mazeTool.walls[door.x, door.y].gameObject;
 	}
 	
-	public Vector3 GetKeyLocation() {
-		return key.ToVector3()+(Vector3.one/2);
+	/*public GameObject GetKey() {
+		GameObject result = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		result.transform.position = key.ToVector3()+(Vector3.one/2);
+		return result;
+	}*/
+
+	public Point3[] FindDoor() {
+		return Point3FromDataToGame(door);
+	}
+	public Point3[] FindKey() {
+		return Point3FromDataToGame(key);
 	}
 
-	public void FindDoor() { }
-	public void FindKey() { }
+	/*public GameObject GetWalls() {
+		return (GameObject)Instantiate(mazeTool.wallContainer.gameObject);
+	}*/
 
-	public GameObject GetWalls() {
-		return (GameObject)Object.Instantiate(mazeTool.wallContainer.gameObject);
-	}
-
-	public Light[,] GetLights(Light l) {
+	public Light[,] GetLights(Func<GameObject> getLight) {
 		Light[,] result = new Light[mazeTool.width, mazeTool.height];
 		GameObject container = new GameObject("lights");
-		for (int i=0; i<mazeTool.cells.GetLength(0); ++i) {
-			for (int j=0; j<mazeTool.cells.GetLength(1); ++j) {
-				GameObject light = (GameObject)Object.Instantiate(l.gameObject);
+		for (int i=0; i<result.GetLength(0); ++i) {
+			for (int j=0; j<result.GetLength(1); ++j) {
+				GameObject light = getLight();
 				result[i, j] = light.GetComponent<Light>();
 				light.transform.position = new Vector3(i+0.5f, 1, j+0.5f);
 				light.transform.parent = container.transform;
@@ -102,7 +111,7 @@ public class MazeStructure {
 	/// <summary>
 	/// Transforms the given Point3(s) from game-space to data-space.
 	/// The argument must have (Length==1 || Length==2).
-	/// This constraint must always be true: (p+1)==output[0]+output[output.Length-1].
+	/// This constraint must always be true: (output+1)==p[0]+p[p.Length-1].
 	/// </summary>
 	public static Point3 Point3FromGameToData(Point3[] p) {
 		return (p[0]+p[p.Length-1]-1);

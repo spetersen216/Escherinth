@@ -4,23 +4,15 @@ using UnityEngine.UI;
 
 public class MazeGame : MonoBehaviour {
 
-	public GameObject maze;
 	public LightSystem lights;
-	public string mazeToGenerate;
-	public Component[] comps;
-	private GameObject mazeObj;
-	private MazeTool mazeTool;
-	public IEnumerable walls;
+	//public GameObject mazeObj;
+	public MazeTool mazeTool;
 	public Key key;
-	private Point3 key_loc;
-	private GameObject door;
-	private GameObject map;
-	private GameObject plane;
+	public GameObject door;
 	public OVRPlayerController player_control;
-	private MazeStructure mazeStruct;
-	//private Transform walls;
-	private GameObject left_cam;
-	private GameObject right_cam;
+	public MazeStructure mazeStruct;
+	public GameObject left_cam;
+	public GameObject right_cam;
 
 	//private OVRMainMenu menu;
 	//private bool inMenu = false;
@@ -28,7 +20,7 @@ public class MazeGame : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//call for start menu
-
+		mazeTool.Start ();
 		//create maze objects
 		createObjects (); //resize ground
 
@@ -45,22 +37,15 @@ public class MazeGame : MonoBehaviour {
 
 
 	private void createObjects(){
-
-		key = (GameObject)Instantiate(key, new Vector3 (0, 0, 0), Quaternion.identity);
-		lights = (GameObject)Instantiate(lights, new Vector3(85.4f,))
-		mazeTool = maze.GetComponent<MazeTool>();
-
-		//comps = mazeObj.GetComponents<Component>();
-
-		//foreach (Component c in comps) {
-		//	Debug.Log(c.ToString());
-		//}
-
+		
 		mazeStruct = new MazeStructure (mazeTool);
-//		Debug.Log ("" + map.name);	
 
-		//plane.transform.position = new Vector3(50,1,50);
-		Instantiate (player_control, new Vector3 (1, 1, 1), Quaternion.identity);
+		key = ((GameObject)Instantiate(key.gameObject, mazeStruct.FindKey()[0].ToVector3(), Quaternion.identity)).GetComponent<Key>();
+		//lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
+		lights.Init(mazeStruct);
+		door = mazeStruct.GetDoor();
+
+		Instantiate (player_control, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find ("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
 
@@ -68,10 +53,9 @@ public class MazeGame : MonoBehaviour {
 			(Material)Resources.Load ("Overcast2 Skybox", typeof(Material));
 		right_cam.gameObject.AddComponent<Skybox> ().material = 
 			(Material)Resources.Load ("Overcast2 Skybox", typeof(Material));
-		walls = mazeTool.walls;
+//		walls = mazeTool.walls;
 
-		mazeStruct.FindKey ();
-		mazeStruct.FindDoor ();
+
 
 		//GameObject[] ws = Object.FindObjectsOfType (typeof(MazeToolWall)) as GameObject[];
 		/*string[] names = new string[100];
@@ -93,5 +77,19 @@ public class MazeGame : MonoBehaviour {
 
 		//key.tag = "collectable";
 
+	}
+
+
+	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
+	void OnTriggerEnter (Collider collider)
+	{
+		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
+		if (collider.GetComponent<Key>() == key)
+		{
+			//Debug.Log("Collision with collection");
+			door.SetActive(false);
+			collider.gameObject.SetActive(false);
+			lights.keyTime = 0;
+		}
 	}
 }
