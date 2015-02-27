@@ -27,9 +27,14 @@ public class LightSystem : MonoBehaviour {
 		for (int i=0; i<lights.GetLength (0); ++i)
 			for (int j=0; j<lights.GetLength (1); ++j)
 				lights[i, j].intensity = Mathf.Max (Mathf.Min (GetLightAtPoint (i, j), 2), 0);
+
+		lights [1, 0].intensity = 2;
 	}
 
 	private float GetLightAtPoint(int i, int j) {
-		return (path.GetGamePos (new Point3(i, 1, j))+keyTime);
+		float result = (path.GetGamePos(new Point3(i+1, 1, j+1))+keyTime);
+		if (result<1)
+			return 0;
+		return result;
 	}
 }
