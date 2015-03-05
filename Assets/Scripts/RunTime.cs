@@ -25,6 +25,10 @@ public class RunTime : MonoBehaviour {
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key)
 		{
+			foreach(Light l in lights.lights)
+			{
+				l.GetComponent<LightFlicker>().stopFlicker();
+			}
 			//Debug.Log("Collision with collection");
 			door.SetActive(false);
 			collider.gameObject.SetActive(false);

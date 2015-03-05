@@ -6,7 +6,7 @@ public class LightSystem : MonoBehaviour {
 	
 	public float keyTime=float.MaxValue;
 	public Light lightBlueprint;
-	private Light[,] lights;
+	public Light[,] lights;
 	private Pathfinding path;
 
 	// Use this for initialization
