@@ -8,9 +8,9 @@ public class MazeStructure {
 	private Point3 door;
 	private Point3 key;
 	
-	public MazeStructure(MazeTool mazeTool) {
+	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back) {
 		// initialize data
-		this.mazeTool = mazeTool;
+		this.mazeTool = top;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
 			for (int j=0; j<data.GetLength(1); ++j)
@@ -268,5 +268,13 @@ public class MazeStructure {
 
 		throw new NotImplementedException("Vector3FromSphereToCube is not yet implemented");
 		return v;
+	}
+
+	public Vector3 Move(Vector3 from, Vector3 to) {
+		return to;
+	}
+
+	public MazeCell[,,] MakeCells(GameObject[] cellWalls, GameObject[] cellWallTops, GameObject floor, float radius) {
+		return null;
 	}
 }
