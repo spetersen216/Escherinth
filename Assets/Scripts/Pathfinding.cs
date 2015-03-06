@@ -8,7 +8,7 @@ public class Pathfinding {
 	private bool[,,] walls;
 	
 	/// <summary>
-	/// Takes a Point3 in data coordinates
+	/// Takes a Point3 in data coordinates.
 	/// </summary>
 	public Pathfinding(bool[,,] walls, Point3 center) {
 		// initialize member variables

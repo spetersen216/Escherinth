@@ -6,10 +6,12 @@ public class LightSystem : MonoBehaviour {
 	
 	public float keyTime=float.MaxValue;
 	public Light lightBlueprint;
+	public AnimationCurve brightness;
+	public float numLightsTurningOff=4f;
 	private Light[,] lights;
 	private Pathfinding path;
 
-	// Use this for initialization
+
 	public void Init(MazeStructure mazeStruct) {
 		print(lightBlueprint.name);
 		Instantiate(lightBlueprint.gameObject);
@@ -20,7 +22,7 @@ public class LightSystem : MonoBehaviour {
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
 	
-	// Update is called once per frame
+	
 	void Update () {
 		keyTime -= Time.deltaTime;
 
@@ -31,10 +33,12 @@ public class LightSystem : MonoBehaviour {
 		lights [1, 0].intensity = 2;
 	}
 
+	/// <summary>
+	/// Returns the appropriate brightness for the light at (i, j)
+	/// </summary>
 	private float GetLightAtPoint(int i, int j) {
-		float result = (path.GetGamePos(new Point3(i+1, 1, j+1))+keyTime);
-		if (result<1)
-			return 0;
-		return result;
+		float result = path.GetGamePos(new Point3(i+1, 1, j+1))+keyTime;
+		result = brightness.Evaluate(1-result/numLightsTurningOff);
+		return 2*result;
 	}
 }

@@ -36,7 +36,7 @@ public struct Point3 {
 				throw new UnityException("invalid index");
 			}
 		}
-		private set {
+		set {
 			switch (index) {
 			case 0:
 				x = value;
