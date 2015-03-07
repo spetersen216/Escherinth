@@ -37,8 +37,8 @@ public class MazeGame : MonoBehaviour {
 	
 	
 	private void createObjects(){
-		
-		mazeStruct = new MazeStructure (mazeTool);
+
+		mazeStruct = new MazeStructure(mazeTool, mazeTool, mazeTool, mazeTool, mazeTool, mazeTool);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
 		position.Scale(mazeTool.transform.localScale);

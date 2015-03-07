@@ -101,6 +101,7 @@ public class MazeStructure {
 									Vector3FromCubeToSphere(a+x+z, mazeTool.width, a+x+z, 50)
 								};
 								Vector3 normal = Vector3.Cross(x, y);
+								normal = Vector3.zero;
 								Vector3[] normals = new Vector3[]{normal, normal, normal, normal};
 								Vector2[] uvs = new Vector2[]{Vector2.zero, Vector2.right, Vector2.up, Vector2.one};
 								AddMesh(floor, tris, verts, normals, uvs);
@@ -129,7 +130,7 @@ public class MazeStructure {
 									Vector3FromCubeToSphere(a+(0.95f*x)+(0.95f*z), mazeTool.width, a+(0.95f*x)+(0.95f*z), 50),
 									Vector3FromCubeToSphere(a+(0.05f*x)+(0.95f*z), mazeTool.width, a+(0.05f*x)+(0.95f*z), 50)
 								};
-								Vector3 n = Vector3.up;
+								Vector3 n = Vector3.zero;
 								Vector3[] normals = new Vector3[]{n, n, n, n, n, n, n, n, n, n, n, n};
 								Vector2 ze = Vector2.zero;
 								Vector2[] uvs = new Vector2[]{ze, ze, ze, ze, ze, ze, ze, ze, ze, ze, ze, ze};

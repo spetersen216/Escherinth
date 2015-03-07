@@ -8,7 +8,7 @@ public class LightSystem:MonoBehaviour {
 	public Light lightBlueprint;
 	public AnimationCurve brightness;
 	public float numLightsTurningOff=4f;
-	private Light[,] lights;
+	public Light[,] lights;
 	private Pathfinding path;
 
 
