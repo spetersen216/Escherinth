@@ -5,22 +5,17 @@ using System.Collections.Generic;
 public class Pathfinding {
 	private Point3 center;
 	private int[,,] data;
-	private bool[,,] walls;
+	private MazeStructure maze;
 	
 	/// <summary>
 	/// Takes a Point3 in data coordinates.
 	/// </summary>
-	public Pathfinding(bool[,,] walls, Point3 center) {
+	public Pathfinding(MazeStructure maze, bool[,,] walls, Point3 center) {
 		// initialize member variables
 		this.center = center;
 		Debug.Log(center);
 		data = new int[walls.GetLength(0), walls.GetLength(1), walls.GetLength(2)];
 		data.Initialize();
-		this.walls = new bool[walls.GetLength(0), walls.GetLength(1), walls.GetLength(2)];
-		for (int i=0; i<walls.GetLength(0); ++i)
-			for (int j=0; j<walls.GetLength(1); ++j)
-				for (int k=0; k<walls.GetLength(2); ++k)
-					this.walls[i, j, k] = walls[i, j, k];
 		
 		// create visited matrix
 		bool[, ,] visited = new bool[walls.GetLength(0), walls.GetLength(1), walls.GetLength(2)];
@@ -41,7 +36,7 @@ public class Pathfinding {
 			// add appropriate neighbors to toVisit
 			Point3[] neighbors = Point3.Scramble(pos.neighbors(2));
 			foreach (Point3 newPos in neighbors)
-				if (ValidMove(pos, newPos) && (!visited[newPos.x, newPos.y, newPos.z]))
+				if (maze.ValidMove(pos, newPos) && (!visited[newPos.x, newPos.y, newPos.z]))
 					toVisit.Enqueue(new VisitPoint(newPos, value+1));
 		}
 	}
@@ -60,7 +55,7 @@ public class Pathfinding {
 			Point3 previous = target;
 			Point3[] neighbors = target.neighbors(2);
 			foreach (Point3 newPos in neighbors) {
-				if (ValidMove(target, newPos) && data[newPos.x, newPos.y, newPos.z]<data[target.x, target.y, target.z]) {
+				if (maze.ValidMove(target, newPos) && data[newPos.x, newPos.y, newPos.z]<data[target.x, target.y, target.z]) {
 					result[--index] = MazeStructure.Point3FromDataToGame(target)[0];
 					target = newPos;
 					break;
@@ -80,11 +75,6 @@ public class Pathfinding {
 	public int GetGamePos(Point3 pos) {
 		pos = MazeStructure.Point3FromGameToData(new Point3[]{pos});
 		return data[pos.x, pos.y, pos.z];
-	}
-	
-	private bool ValidMove(Point3 p1, Point3 p2) {
-		Point3 avg = (p1+p2)/2;
-		return !walls[avg.x, avg.y, avg.z];
 	}
 	
 	private struct VisitPoint {

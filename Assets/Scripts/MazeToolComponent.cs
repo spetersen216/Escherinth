@@ -7,7 +7,7 @@ using UnityEngine;
 public class MazeToolComponent:MonoBehaviour {
 	public bool selectMazeTool;
 
-	public void Update() {
+	public virtual void Update() {
 		if (selectMazeTool) {
 			selectMazeTool = false;
 			Selection.activeGameObject = transform.parent.parent.gameObject;

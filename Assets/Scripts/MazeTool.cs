@@ -11,6 +11,9 @@ public class MazeTool:MonoBehaviour {
 		get { return Selection.activeGameObject; }
 		set { Selection.activeGameObject = value; }
 	}
+	public bool isRunning {
+		get { return EditorApplication.isPlaying; }
+	}
 	
 	// maze variables
 	public int width=10;
@@ -19,6 +22,7 @@ public class MazeTool:MonoBehaviour {
 	public MazeToolCell[,] cells;
 	public Transform wallContainer;
 	public Transform cellContainer;
+	public Transform other;
 	public Transform border;
 	
 	// display variables
@@ -61,7 +65,7 @@ public class MazeTool:MonoBehaviour {
 	void Update() {
 		// if anything changed
 		if (// if anything is null
-			wallContainer==null || cellContainer==null || border==null || wallMaterial==null || walls==null || cells==null ||
+			wallContainer==null || cellContainer==null || other==null || border==null || wallMaterial==null || walls==null || cells==null ||
 			// if a display variable changed
 			wallContainer.gameObject.activeSelf!=displayWalls || cellContainer.gameObject.activeSelf!=displayCells ||
 			border.gameObject.activeSelf!=displayBorders ||
@@ -79,6 +83,7 @@ public class MazeTool:MonoBehaviour {
 			// if strings don't match
 			_toString!=toString) {
 
+			// bound width and height
 			height = Mathf.Max(height, 2);
 			width = Mathf.Max(width, 2);
 
@@ -131,9 +136,8 @@ public class MazeTool:MonoBehaviour {
 			// handle wallMaterial, defaultDiffuse, visibleWalls, unlitShader
 			if (wallMaterial==null)
 				wallMaterial = new Material(Shader.Find("Transparent/Diffuse"));
-			wallMaterial.shader = (visibleWalls?
-		                       (unlitShader?Shader.Find("Sprites/Default"):Shader.Find("Diffuse")):
-		                       Shader.Find("Transparent/Diffuse"));
+			wallMaterial.shader = (!visibleWalls?Shader.Find("Transparent/Diffuse"):
+				(unlitShader?Shader.Find("Sprites/Default"):Shader.Find("Diffuse")));
 			wallColor.a = (visibleWalls?1f:0f);
 			wallMaterial.color = wallColor;
 			if (!visibleWalls)
@@ -143,7 +147,7 @@ public class MazeTool:MonoBehaviour {
 			DestroyImmediate(temp);
 
 			// handle walls
-			if (walls==null) {
+			if (walls==null || wallContainer==null) {
 				// handle wallContainer
 				if (wallContainer==null)
 					wallContainer = transform.Find("wall container");
@@ -191,7 +195,7 @@ public class MazeTool:MonoBehaviour {
 			}
 
 			// handle cells
-			if (cells==null) {
+			if (cells==null || cellContainer==null) {
 				// handle cellContainer
 				if (transform.Find("tile container")!=null && transform.Find("cell container")==null)
 					transform.Find("tile container").gameObject.name = "cell container";
@@ -268,6 +272,14 @@ public class MazeTool:MonoBehaviour {
 			border.Find("bottom").localScale = new Vector3(2*width, wallHeight, 0.1f);
 			border.Find("left").localScale =   new Vector3(0.1f, wallHeight, 2*height);
 			border.Find("right").localScale =  new Vector3(0.1f, wallHeight, 2*height);
+
+			// handle other
+			if (other==null)
+				other = transform.Find("Other");
+			if (other==null) {
+				other = new GameObject("Other").transform;
+				other.parent = transform;
+			}
 
 			// handle display variables
 			wallContainer.gameObject.SetActive(displayWalls);
