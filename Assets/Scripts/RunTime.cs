@@ -16,6 +16,7 @@ public class RunTime : MonoBehaviour {
 		this.key = key;
 		skyboxMaterial = mat;
 		mat.SetColor("_Tint", new Color32 ((byte)128,(byte)128,(byte)128,(byte)128));
+		//GetComponent<OVRPlayerController> ().GetComponentInChildren<Light> ().enabled = false;
 	}
 
 
@@ -36,6 +37,9 @@ public class RunTime : MonoBehaviour {
 			print (skyboxMaterial.GetColor("_Tint"));
 			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
 			gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
+			gameObject.GetComponentInChildren<Light>().enabled = true;
+			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
+
 		}
 	}
 }

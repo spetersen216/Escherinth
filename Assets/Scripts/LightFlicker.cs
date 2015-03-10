@@ -4,6 +4,7 @@ using System.Collections;
 public class LightFlicker : MonoBehaviour {
 	private Light l;
 	private float r;
+	public AnimationCurve brightness;
 	private bool flickering = true;
 	public float low_intensity = .1f;
 	public float high_intensity = .4f;
@@ -13,7 +14,7 @@ public class LightFlicker : MonoBehaviour {
 	//	flickering = true;
 		l = this.gameObject.light;
 		l.enabled = true;
-		Debug.Log (this.gameObject.light.ToString ());
+//		Debug.Log (this.gameObject.light.ToString ());
 	}
 
 	// Update is called once per frame
@@ -21,19 +22,25 @@ public class LightFlicker : MonoBehaviour {
 		if (flickering == true) {
 			r = Random.Range (0f, 2f);
 			if (r <= randomness) {
-				l.intensity = low_intensity;
+				float change = high_intensity;
+				while (change > low_intensity) {
+					change -= Time.deltaTime;
+					l.intensity = brightness.Evaluate(change);
+				}
 			} else {
-				l.intensity = high_intensity;
+				float change = low_intensity;
+				while (change < high_intensity) {
+					change += Time.deltaTime;
+					l.intensity = brightness.Evaluate(change);
+				}
 			}
 		}
 	}
-
-	public void stopFlicker()
-	{
+	public void stopFlicker(){
 		this.flickering = false;
+		this.gameObject.light.intensity = 2f;
 	}
-	public void startFlicker()
-	{
+	public void startFlicker(){
 		this.flickering = true;
 	}
 }

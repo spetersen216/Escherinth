@@ -43,6 +43,8 @@ public class MazeGame : MonoBehaviour {
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
 		position.Scale(mazeTool.transform.localScale);
 		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
+		key.transform.rotation = Quaternion.Euler (90,0,0);
+		key.transform.localPosition += new Vector3 (0,1.5f,0);
 		//lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
 		lights.Init(mazeStruct);
 		door = mazeStruct.GetDoor();
@@ -55,6 +57,8 @@ public class MazeGame : MonoBehaviour {
 		right_cam.gameObject.AddComponent<Skybox>().material = 
 			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
 		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material);
+		player.GetComponentInChildren<LightFlicker> ().enabled = false;
+		player.GetComponentInChildren<Light> ().enabled = false;
 
 		//		walls = mazeTool.walls;
 		
