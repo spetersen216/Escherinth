@@ -68,10 +68,10 @@ public class MazeCell:MonoBehaviour {
 		result.normals = norms;
 
 		// directly copy uvs
-		result.uv = m.uv;
+		result.uv = (Vector2[])m.uv.Clone();
 
 		// directly copy triangles
-		result.triangles = m.triangles;
+		result.triangles = (int[])m.triangles.Clone();
 
 		return result;
 	}

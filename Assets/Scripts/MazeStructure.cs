@@ -329,7 +329,15 @@ public class MazeStructure {
 		GameObject container = new GameObject("Maze-Sphere Container");
 		MazeCell[,,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
 		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
-		visited.Initialize();
+		//visited.Initialize();
+		for (int i=0; i<visited.GetLength(0); ++i)
+			for (int j=0; j<visited.GetLength(1); ++j)
+				for (int k=0; k<visited.GetLength(2); ++k)
+					visited[i, j, k] = true;
+		for (int i=0; i<3; ++i)
+			for (int j=0; j<3; ++j)
+				for (int k=0; k<3; ++k)
+					visited[i, j, k] = false;
 		int count=0;
 		
 		// iterate over {x, y, z}
