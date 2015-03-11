@@ -37,7 +37,7 @@ public class LightSystem:MonoBehaviour {
 	/// Returns the appropriate brightness for the light at (i, j)
 	/// </summary>
 	private float GetLightAtPoint(int i, int j, int k) {
-		float result = path.GetGamePos(new Point3(i, j, k))+keyTime;
+		float result = path.GetDistanceToEnd(new Point3(i, j, k))+keyTime;
 		result = brightness.Evaluate(1-result/numLightsTurningOff);
 		return 255*result;
 	}

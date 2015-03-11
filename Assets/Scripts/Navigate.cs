@@ -3,14 +3,15 @@ using System.Collections;
 
 public class Navigate : MonoBehaviour {
 	public Transform goal;
+	private NavMeshAgent agent;
 	// Use this for initialization
 	void Start () {
-		NavMeshAgent agent = GetComponent<NavMeshAgent> ();
-		agent.destination = goal.position;
+		agent = GetComponent<NavMeshAgent> ();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+
+	public void SetDestination(Transform dest){
+		goal = dest;
+		agent.destination = dest.position;
 	}
+
 }

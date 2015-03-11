@@ -28,6 +28,8 @@ public class MazeGame : MonoBehaviour {
 	public GameObject left_cam;
 	public GameObject right_cam;
 	public AnimationCurve lightFlicker;
+	//public GameObject monster;
+	//public Pathfinding temp;
 
 	// Use this for initialization
 	void Start () {
@@ -50,7 +52,8 @@ public class MazeGame : MonoBehaviour {
 		lights.Init(mazeStruct, mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius));
 		door = mazeStruct.GetDoor();
-		
+	//	monster = (GameObject)Instantiate(monster.gameObject, position, Quaternion.identity);
+
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
@@ -61,9 +64,14 @@ public class MazeGame : MonoBehaviour {
 		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material);
 		player.GetComponentInChildren<LightFlicker> ().enabled = false;
 		player.GetComponentInChildren<Light> ().enabled = false;
-
-
+	//	temp  = mazeStruct.Pathfind(mazeStruct.FindDoor()[0]);
+	//	temp.
+		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
 
 	}
+
+	//void Update(){
+		//monster.GetComponent<Navigate> ().SetDestination (this.door.transform);
+	//}
 
 }
