@@ -5,50 +5,46 @@ using UnityEngine.UI;
 public class MazeGame : MonoBehaviour {
 	
 	public LightSystem lights;
-	//public GameObject mazeObj;
-	public MazeTool mazeTool;
+
+	public MazeTool top;
+	public MazeTool bottom;
+	public MazeTool left;
+	public MazeTool right;
+	public MazeTool back;
+	public MazeTool front;
+	public float radius;
 	public Key key;
 	public GameObject door;
 	public OVRPlayerController player_control;
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
 	public GameObject right_cam;
-	
-	//private OVRMainMenu menu;
-	//private bool inMenu = false;
-	
+	public GameObject[] walls;
+	public GameObject[] tops;
+	public GameObject floor;
+	public AnimationCurve lightFlicker;
+
 	// Use this for initialization
 	void Start () {
 		//call for start menu
-		mazeTool.Start ();
-		//create maze objects
-		createObjects (); //resize ground
+		top.Start ();
+		bottom.Start ();
+		left.Start ();
+		right.Start ();
+		back.Start ();
+		front.Start ();
 		
-		//add key
-		//add door 
-		//lights
-	}
-	
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-	
-	
-	private void createObjects(){
-
-		mazeStruct = new MazeStructure(mazeTool, mazeTool, mazeTool, mazeTool, mazeTool, mazeTool);
+		mazeStruct = new MazeStructure (top, bottom, left, right, front, back);//, lightFlicker);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
-		position.Scale(mazeTool.transform.localScale);
+		position.Scale(bottom.transform.localScale);
 		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
 		key.transform.rotation = Quaternion.Euler (90,0,0);
 		key.transform.localPosition += new Vector3 (0,1.5f,0);
 		//lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
-		lights.Init(mazeStruct);
+		lights.Init(mazeStruct,walls,tops,floor, radius);
 		door = mazeStruct.GetDoor();
-
+		
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
@@ -60,32 +56,8 @@ public class MazeGame : MonoBehaviour {
 		player.GetComponentInChildren<LightFlicker> ().enabled = false;
 		player.GetComponentInChildren<Light> ().enabled = false;
 
-		//		walls = mazeTool.walls;
-		
-		
-		
-		//GameObject[] ws = Object.FindObjectsOfType (typeof(MazeToolWall)) as GameObject[];
-		/*string[] names = new string[100];
-		for (int i = 0; i < mazeTool.width+9; i++) {
-			for (int j = 0; j < mazeTool.width+9; j++) {
-				string s = "wall " + i + " " + j;
-			}
-		}
-		GameObject[] w = new GameObject[100];
-		int count = 0;
-		foreach (string s in names) {
-			w[count] = GameObject.Find (s);
-			count++;
-			Debug.Log (s);
-		}*/
-		//Debug.Log(""+ mazeStruct.FindKey().ToString());
-		//key.transform.position.Set (mazeStruct.FindKey().x, mazeStruct.FindKey().y, mazeStruct.FindKey().z);
-		//player_control.gameObject.AddComponent<CollectionMechanic> ();
-		
-		//key.tag = "collectable";
-		
+
+
 	}
-	
-	
 
 }

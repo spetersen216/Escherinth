@@ -8,17 +8,18 @@ public class LightSystem:MonoBehaviour {
 	public Light lightBlueprint;
 	public AnimationCurve brightness;
 	public float numLightsTurningOff=4f;
-	public Light[,] lights;
+	public MazeCell[,,] cells;
 	private Pathfinding path;
 
 
-	public void Init(MazeStructure mazeStruct) {
+	public void Init(MazeStructure mazeStruct, GameObject[] walls, GameObject[] tops, GameObject floor, float radius) {
 		print(lightBlueprint.name);
 		Instantiate(lightBlueprint.gameObject);
 		Func<GameObject> getLight = () => {
 			return (GameObject)Instantiate(lightBlueprint.gameObject);
 		};
-		this.lights = mazeStruct.GetLights(getLight);
+		//this.lights = mazeStruct.GetLights(getLight);
+		this.cells = mazeStruct.MakeCells (walls, tops, floor, radius);
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
 
@@ -26,11 +27,12 @@ public class LightSystem:MonoBehaviour {
 	void Update() {
 		keyTime -= Time.deltaTime;
 
-		for (int i=0; i<lights.GetLength(0); ++i)
-			for (int j=0; j<lights.GetLength(1); ++j)
-				lights[i, j].intensity = Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+		for (int i=0; i<cells.GetLength(0); ++i)
+			for (int j=0; j<cells.GetLength(1); ++j)
+				for(int k =0; k < cells.GetLength(2); k++)
+					cells[i, j, k].light.intensity = Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
 
-		lights[1, 0].intensity = 2;
+		cells [1, 0, 1].SetBrightness (Color.white);
 	}
 
 	/// <summary>
