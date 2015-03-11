@@ -72,7 +72,7 @@ public class Pathfinding {
 		return result;
 	}
 	
-	public int GetGamePos(Point3 pos) {
+	public int GetDistanceToEnd(Point3 pos) {
 		pos = MazeStructure.Point3FromGameToData(new Point3[]{pos});
 		return data[pos.x, pos.y, pos.z];
 	}
