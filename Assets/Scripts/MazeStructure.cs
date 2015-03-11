@@ -7,9 +7,11 @@ public class MazeStructure {
 	private bool[,,] data;
 	private Point3 door;
 	private Point3 key;
+	private AnimationCurve flicker;
 	
-	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back) {
+	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, AnimationCurve lightFlicker) {
 		// initialize data
+		this.flicker = lightFlicker;
 		this.mazeTool = top;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
@@ -383,7 +385,7 @@ public class MazeStructure {
 							// create the MazeCell
 							MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z).AddComponent<MazeCell>();
 							cell.transform.parent = parent.transform;
-							cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], a, x, y, z);
+							cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], flicker, a, x, y, z);
 							result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = cell;
 						}
 					}
