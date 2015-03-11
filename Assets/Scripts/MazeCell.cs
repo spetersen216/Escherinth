@@ -20,16 +20,19 @@ public class MazeCell:MonoBehaviour {
 		floor = new GameObject("floor");
 		floor.AddComponent<MeshFilter>().mesh = Morph(floor.GetComponent<MeshFilter>().mesh, a, x, y, z);
 		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(floor.renderer.material);
+		floor.transform.parent = transform;
 
 		// create cell wall
 		wall = new GameObject("cell wall");
 		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall.GetComponent<MeshFilter>().mesh, a, x, y, z);
 		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWall.renderer.material);
+		wall.transform.parent = transform;
 
 		// create cell wall top
 		wallTop = new GameObject("cell wall top");
 		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop.GetComponent<MeshFilter>().mesh, a, x, y, z);
 		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTop.renderer.material);
+		wallTop.transform.parent = transform;
 
 		// initialize lightbulb
 		lightbulb = new GameObject("light").AddComponent<Light>();
@@ -37,6 +40,7 @@ public class MazeCell:MonoBehaviour {
 		lightbulb.range = 12;
 		lightbulb.intensity = 0.4f;
 		lightbulb.renderMode = LightRenderMode.ForcePixel;
+		lightbulb.transform.parent = transform;
 
 		// add LightFlicker
 		flicker = lightbulb.gameObject.AddComponent<LightFlicker>();

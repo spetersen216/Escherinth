@@ -238,7 +238,7 @@ public class MazeStructure {
 	/// This constraint must always be true: (output+1)==p[0]+p[p.Length-1].
 	/// </summary>
 	public static Point3 Point3FromGameToData(Point3[] p) {
-		return (p[0]+p[p.Length-1]-1);
+		return ((p[0]+p[p.Length-1])-1);
 	}
 
 	/// <summary>
