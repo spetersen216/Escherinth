@@ -7,11 +7,9 @@ public class MazeStructure {
 	private bool[,,] data;
 	private Point3 door;
 	private Point3 key;
-	private AnimationCurve curve;
 	
-	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, AnimationCurve curve) {
+	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back) {
 		// initialize data
-		this.curve = curve;
 		this.mazeTool = top;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
@@ -325,19 +323,21 @@ public class MazeStructure {
 	/// <summary>
 	/// Returns a 3D array of MazeCells that create a sphere, with indexes in game-space.
 	/// </summary>
-	public MazeCell[,,] MakeCells(GameObject[] cellWalls, GameObject[] cellWallTops, GameObject floor, float radius) {
+	public MazeCell[,,] MakeCells(Mesh floor, Mesh[] cellWalls, Mesh[] cellWallTops, Material cellFloorMat,
+		Material cellWallMat, Material cellWallTopMat, AnimationCurve flicker, float radius)
+	{
 		GameObject container = new GameObject("Maze-Sphere Container");
 		MazeCell[,,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
 		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
-		//visited.Initialize();
-		for (int i=0; i<visited.GetLength(0); ++i)
+		visited.Initialize();
+		/*for (int i=0; i<visited.GetLength(0); ++i)
 			for (int j=0; j<visited.GetLength(1); ++j)
 				for (int k=0; k<visited.GetLength(2); ++k)
 					visited[i, j, k] = true;
 		for (int i=0; i<3; ++i)
 			for (int j=0; j<3; ++j)
 				for (int k=0; k<3; ++k)
-					visited[i, j, k] = false;
+					visited[i, j, k] = false;*/
 		int count=0;
 		
 		// iterate over {x, y, z}
@@ -393,7 +393,8 @@ public class MazeStructure {
 							// create the MazeCell
 							MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z).AddComponent<MazeCell>();
 							cell.transform.parent = parent.transform;
-							cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], curve, a, x, y, z);
+							cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
+								cellWallTopMat, flicker, a, x, y, z);
 							result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = cell;
 						}
 					}

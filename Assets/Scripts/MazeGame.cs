@@ -12,6 +12,14 @@ public class MazeGame : MonoBehaviour {
 	public MazeTool right;
 	public MazeTool back;
 	public MazeTool front;
+
+	public Mesh cellFloor;
+	public Mesh[] cellWalls;
+	public Mesh[] cellWallTops;
+	public Material cellFloorMat;
+	public Material cellWallMat;
+	public Material cellWallTopMat;
+
 	public float radius;
 	public Key key;
 	public GameObject door;
@@ -19,9 +27,6 @@ public class MazeGame : MonoBehaviour {
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
 	public GameObject right_cam;
-	public GameObject[] walls;
-	public GameObject[] tops;
-	public GameObject floor;
 	public AnimationCurve lightFlicker;
 
 	// Use this for initialization
@@ -34,7 +39,7 @@ public class MazeGame : MonoBehaviour {
 		back.Start ();
 		front.Start ();
 		
-		mazeStruct = new MazeStructure (top, bottom, left, right, front, back, lightFlicker);
+		mazeStruct = new MazeStructure (top, bottom, left, right, front, back);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
 		position.Scale(bottom.transform.localScale);
@@ -42,7 +47,8 @@ public class MazeGame : MonoBehaviour {
 		key.transform.rotation = Quaternion.Euler (90,0,0);
 		key.transform.localPosition += new Vector3 (0,1.5f,0);
 		//lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
-		lights.Init(mazeStruct,walls,tops,floor, radius);
+		lights.Init(mazeStruct, mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
+			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius));
 		door = mazeStruct.GetDoor();
 		
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);

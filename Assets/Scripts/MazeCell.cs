@@ -13,25 +13,25 @@ public class MazeCell:MonoBehaviour {
 	/// <summary>
 	/// Initializes the MazeCell.
 	/// </summary>
-	public void Init(Point3 pos, GameObject cellFloor, GameObject cellWall, GameObject cellWallTop, AnimationCurve curve,
-		Vector3 a, Vector3 x, Vector3 y, Vector3 z) {
+	public void Init(Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
+		Material cellWallTopMat, AnimationCurve curve, Vector3 a, Vector3 x, Vector3 y, Vector3 z) {
 
 		// create cell floor
 		floor = new GameObject("floor");
-		floor.AddComponent<MeshFilter>().mesh = Morph(floor.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(floor.renderer.material);
+		floor.AddComponent<MeshFilter>().mesh = Morph(cellFloor, a, x, y, z);
+		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellFloorMat);
 		floor.transform.parent = transform;
 
 		// create cell wall
 		wall = new GameObject("cell wall");
-		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWall.renderer.material);
+		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall, a, x, y, z);
+		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallMat);
 		wall.transform.parent = transform;
 
 		// create cell wall top
 		wallTop = new GameObject("cell wall top");
-		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTop.renderer.material);
+		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop, a, x, y, z);
+		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTopMat);
 		wallTop.transform.parent = transform;
 
 		// initialize lightbulb
@@ -49,7 +49,7 @@ public class MazeCell:MonoBehaviour {
 		flicker.high_intensity = 0.89f;
 		flicker.randomness = 0.05f;
 
-		children = new GameObject[] { floor, wall, wallTop };
+		children = new GameObject[]{floor, wall, wallTop};
 	}
 
 	private Mesh Morph(Mesh m, Vector3 a, Vector3 x, Vector3 y, Vector3 z) {
@@ -57,8 +57,11 @@ public class MazeCell:MonoBehaviour {
 
 		// create new vertices, the Vector Space given by x,y,z, with base at a
 		Vector3[] verts = new Vector3[m.vertices.Length];
-		for (int i=0; i<verts.Length; ++i)
-			verts[i] = a + m.vertices[i].x*x + m.vertices[i].y*y + m.vertices[i].z*z;
+		//print("verts.Length: "+verts.Length);
+		for (int i=0; i<verts.Length; ++i) {
+			verts[i] = a + 100*(m.vertices[i].x*x + m.vertices[i].y*y + m.vertices[i].z*z);
+			//print("verts["+i+"] = "+verts[i]);
+		}
 		result.vertices = verts;
 
 		// calculate new normals

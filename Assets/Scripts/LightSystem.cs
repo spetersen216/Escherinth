@@ -12,14 +12,8 @@ public class LightSystem:MonoBehaviour {
 	private Pathfinding path;
 
 
-	public void Init(MazeStructure mazeStruct, GameObject[] walls, GameObject[] tops, GameObject floor, float radius) {
-		print(lightBlueprint.name);
-		Instantiate(lightBlueprint.gameObject);
-		Func<GameObject> getLight = () => {
-			return (GameObject)Instantiate(lightBlueprint.gameObject);
-		};
-		//this.lights = mazeStruct.GetLights(getLight);
-		this.cells = mazeStruct.MakeCells (walls, tops, floor, radius);
+	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells) {
+		this.cells = cells;
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
 

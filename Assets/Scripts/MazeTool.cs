@@ -584,13 +584,14 @@ public class MazeTool:MonoBehaviour {
 	/// </summary>
 	private void PathFind() {
 		pathFind = false;
-		Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
+		throw new NotImplementedException("");
+		/*Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
 		for (int i=0; i<cells.GetLength(0); i+=2) {
 			for (int j=0; j<cells.GetLength(1); j+=2) {
 				Vector3 v = cells[i, j].transform.localPosition;
 				cells[i, j].transform.localPosition = new Vector3(v.x, path.GetGamePos(new Point3(1+i/2, 1, 1+j/2)), v.z);
 			}
-		}
+		}*/
 	}
 	
 	/// <summary>
@@ -598,7 +599,8 @@ public class MazeTool:MonoBehaviour {
 	/// </summary>
 	private void PathFindToPos() {
 		pathFindToPos = false;
-		Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
+		throw new NotImplementedException("");
+		/*Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
 		Point3[] pathToPoint = path.PathToPoint(new Point3(width, 1, height));
 		print("path length: "+pathToPoint.Length);
 		for (int i=0; i<pathToPoint.Length; ++i) {
@@ -606,7 +608,7 @@ public class MazeTool:MonoBehaviour {
 			print("point: "+pos);
 			Vector3 v = cells[pos.x, pos.z].transform.localPosition;
 			cells[pos.x, pos.z].transform.localPosition = new Vector3(v.x, i, v.z);
-		}
+		}*/
 	}
 	
 	/// <summary>
