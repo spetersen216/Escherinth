@@ -8,27 +8,28 @@ public class MazeCell:MonoBehaviour {
 	private GameObject wallTop;
 	private GameObject[] children;
 	private Light lightbulb;
+	public LightFlicker flicker;
 
 	/// <summary>
 	/// Initializes the MazeCell.
 	/// </summary>
-	public void Init(Point3 pos, GameObject cellFloor, GameObject cellWall, GameObject cellWallTop, AnimationCurve flicker,
+	public void Init(Point3 pos, GameObject cellFloor, GameObject cellWall, GameObject cellWallTop, AnimationCurve curve,
 		Vector3 a, Vector3 x, Vector3 y, Vector3 z) {
 
 		// create cell floor
 		floor = new GameObject("floor");
 		floor.AddComponent<MeshFilter>().mesh = Morph(floor.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		floor.AddComponent<Renderer>().material = (Material)Instantiate(floor.renderer.material);
+		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(floor.renderer.material);
 
 		// create cell wall
 		wall = new GameObject("cell wall");
 		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		wall.AddComponent<Renderer>().material = (Material)Instantiate(cellWall.renderer.material);
+		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWall.renderer.material);
 
 		// create cell wall top
 		wallTop = new GameObject("cell wall top");
 		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop.GetComponent<MeshFilter>().mesh, a, x, y, z);
-		wallTop.AddComponent<Renderer>().material = (Material)Instantiate(cellWallTop.renderer.material);
+		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTop.renderer.material);
 
 		// initialize lightbulb
 		lightbulb = new GameObject("light").AddComponent<Light>();
@@ -38,11 +39,11 @@ public class MazeCell:MonoBehaviour {
 		lightbulb.renderMode = LightRenderMode.ForcePixel;
 
 		// add LightFlicker
-		LightFlicker fl = lightbulb.gameObject.AddComponent<LightFlicker>();
-		fl.brightness = flicker;
-		fl.low_intensity = 0.3f;
-		fl.high_intensity = 0.89f;
-		fl.randomness = 0.05f;
+		flicker = lightbulb.gameObject.AddComponent<LightFlicker>();
+		flicker.brightness = curve;
+		flicker.low_intensity = 0.3f;
+		flicker.high_intensity = 0.89f;
+		flicker.randomness = 0.05f;
 
 		children = new GameObject[] { floor, wall, wallTop };
 	}

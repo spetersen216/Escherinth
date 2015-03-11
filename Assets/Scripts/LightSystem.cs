@@ -30,17 +30,21 @@ public class LightSystem:MonoBehaviour {
 		for (int i=0; i<cells.GetLength(0); ++i)
 			for (int j=0; j<cells.GetLength(1); ++j)
 				for(int k =0; k < cells.GetLength(2); k++)
-					cells[i, j, k].light.intensity = Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+					if(cells[i,j,k] != null) {
+						print ("i: "+i+"; j: "+j+"; k: "+k);
+						byte value = (byte)Mathf.Max (Mathf.Min (GetLightAtPoint(i, j, k), 255), 0);
+						cells[i, j, k].SetBrightness(new Color32(value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+					}
 
-		cells [1, 0, 1].SetBrightness (Color.white);
+		//cells [1, 0, 1].SetBrightness (Color.white);
 	}
 
 	/// <summary>
 	/// Returns the appropriate brightness for the light at (i, j)
 	/// </summary>
-	private float GetLightAtPoint(int i, int j) {
-		float result = path.GetGamePos(new Point3(i+1, 1, j+1))+keyTime;
+	private float GetLightAtPoint(int i, int j, int k) {
+		float result = path.GetGamePos(new Point3(i+1, j+1, k+1))+keyTime;
 		result = brightness.Evaluate(1-result/numLightsTurningOff);
-		return 2*result;
+		return 255*result;
 	}
 }

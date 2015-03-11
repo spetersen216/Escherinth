@@ -34,7 +34,7 @@ public class MazeGame : MonoBehaviour {
 		back.Start ();
 		front.Start ();
 		
-		mazeStruct = new MazeStructure (top, bottom, left, right, front, back);//, lightFlicker);
+		mazeStruct = new MazeStructure (top, bottom, left, right, front, back, lightFlicker);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
 		position.Scale(bottom.transform.localScale);

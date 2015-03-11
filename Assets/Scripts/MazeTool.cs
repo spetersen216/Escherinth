@@ -584,7 +584,7 @@ public class MazeTool:MonoBehaviour {
 	/// </summary>
 	private void PathFind() {
 		pathFind = false;
-		Pathfinding path = new MazeStructure(this, this, this, this, this, this).Pathfind(new Point3(1, 1, 1));
+		Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
 		for (int i=0; i<cells.GetLength(0); i+=2) {
 			for (int j=0; j<cells.GetLength(1); j+=2) {
 				Vector3 v = cells[i, j].transform.localPosition;
@@ -598,7 +598,7 @@ public class MazeTool:MonoBehaviour {
 	/// </summary>
 	private void PathFindToPos() {
 		pathFindToPos = false;
-		Pathfinding path = new MazeStructure(this, this, this, this, this, this).Pathfind(new Point3(1, 1, 1));
+		Pathfinding path = new MazeStructure(this, this, this, this, this, this, null).Pathfind(new Point3(1, 1, 1));
 		Point3[] pathToPoint = path.PathToPoint(new Point3(width, 1, height));
 		print("path length: "+pathToPoint.Length);
 		for (int i=0; i<pathToPoint.Length; ++i) {
