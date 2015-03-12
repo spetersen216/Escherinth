@@ -28,8 +28,10 @@ public class MazeGame : MonoBehaviour {
 	public GameObject left_cam;
 	public GameObject right_cam;
 	public AnimationCurve lightFlicker;
-	//public GameObject monster;
-	//public Pathfinding temp;
+	public GameObject monster;
+	public Pathfinding temp;
+	private MazeCell[,,] cells;
+	public Point3[] points;
 
 	// Use this for initialization
 	void Start () {
@@ -48,11 +50,17 @@ public class MazeGame : MonoBehaviour {
 		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
 		key.transform.rotation = Quaternion.Euler (90,0,0);
 		key.transform.localPosition += new Vector3 (0,1.5f,0);
-		//lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
-		lights.Init(mazeStruct, mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
-			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius));
+		lights = ((GameObject)Instantiate (lights.gameObject, new Vector3 (85.4f, 100f, 100f),Quaternion.identity)).GetComponent<LightSystem>();
+		//cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
+		//	cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
+		MazeCell cell = new GameObject("SingleCell").AddComponent<MazeCell>();
+		cell.Init(new Point3(0,0,0),cellFloor,cellWalls[0], cellWallTops[0], cellFloorMat, cellWallMat, cellWallTopMat,
+		                                      lightFlicker, new Vector3(1,1,1), new Vector3(1,1,1), new Vector3(1,1,1), new Vector3(1,1,1));
+		cells = new MazeCell[2,2,2];
+		cells [0, 0, 0] = cell;
+		lights.Init(mazeStruct,cells);
 		door = mazeStruct.GetDoor();
-	//	monster = (GameObject)Instantiate(monster.gameObject, position, Quaternion.identity);
+		monster = (GameObject)Instantiate(monster.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
@@ -64,14 +72,24 @@ public class MazeGame : MonoBehaviour {
 		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material);
 		player.GetComponentInChildren<LightFlicker> ().enabled = false;
 		player.GetComponentInChildren<Light> ().enabled = false;
-	//	temp  = mazeStruct.Pathfind(mazeStruct.FindDoor()[0]);
+
+		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
+
+		//}
+		//Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));
+
 	//	temp.
 		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
 
 	}
 
-	//void Update(){
+	void Update(){
 		//monster.GetComponent<Navigate> ().SetDestination (this.door.transform);
-	//}
+		/*monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
+
+		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
+		points = temp.PathToPoint (mazeStruct.FindKey () [0]);
+		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));*/
+	}
 
 }
