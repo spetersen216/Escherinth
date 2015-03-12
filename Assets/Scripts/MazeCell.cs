@@ -15,6 +15,8 @@ public class MazeCell:MonoBehaviour {
 	/// </summary>
 	public void Init(Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
 		Material cellWallTopMat, AnimationCurve curve, Vector3 a, Vector3 x, Vector3 y, Vector3 z) {
+			if (pos==Point3.one)
+				print("pos == Point3.one: "+a);
 
 		// create cell floor
 		floor = new GameObject("floor");
@@ -59,10 +61,15 @@ public class MazeCell:MonoBehaviour {
 		Vector3[] verts = new Vector3[m.vertices.Length];
 		//print("verts.Length: "+verts.Length);
 		for (int i=0; i<verts.Length; ++i) {
-			verts[i] = a + 100*(m.vertices[i].x*x + m.vertices[i].y*y + m.vertices[i].z*z);
+			verts[i] = m.vertices[i]+new Vector3(0.01f, 0, 0.01f);
+			verts[i] = a + 100*(verts[i].x*x + verts[i].y*y + verts[i].z*z);
+			Vector3 floor = a + 100*(m.vertices[i].x*x + m.vertices[i].z*z);
+			verts[i] = MazeStructure.Vector3FromCubeToSphere(verts[i], 10, floor, 10);
 			//print("verts["+i+"] = "+verts[i]);
 		}
 		result.vertices = verts;
+		if (a==Vector3.zero)
+			print("verts[0]: "+verts[0]+"; orig[0]: "+m.vertices[0]);
 
 		// calculate new normals
 		Vector3[] norms = new Vector3[m.normals.Length];

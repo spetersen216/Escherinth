@@ -367,15 +367,19 @@ public class MazeStructure {
 
 						// if the cell hasn't been created...
 						if (!visited[p.x, p.y, p.z]) {
+							visited[p.x, p.y, p.z] = true;
+
 							// create a new Vector-space
 							Vector3 a = (p-1).ToVector3()/2;
-							a[yIndex] = (side==1?(side-1)/2:(side+1)/2);
+							a[yIndex] = (side==1?(side-1)/2:(side-1)/2);
 							Vector3 x = Vector3.zero;
 							x[xIndex] = 1;
 							Vector3 y = Vector3.zero;
 							y[yIndex] = (side==1?1:-1);
 							Vector3 z = Vector3.zero;
 							z[zIndex] = 1;
+							if (p==Point3.one)
+								Debug.Log("Point3.one->a = "+a);
 
 							// create a 2D point-space
 							Point3 right = Point3.zero;
