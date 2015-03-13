@@ -14,7 +14,7 @@ public class HUD : MonoBehaviour {
 
 		transform.LookAt (CameraFacing.transform.position);
 		transform.Rotate (0, 180, 0);
-		transform.position = CameraFacing.transform.position + 
-			CameraFacing.transform.rotation * Vector3.forward *1.5f;
+		//transform.position = CameraFacing.transform.position + 
+		//	CameraFacing.transform.rotation * Vector3.forward *1.5f;
 	}
 }
