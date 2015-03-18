@@ -10,6 +10,7 @@ public class LightSystem:MonoBehaviour {
 	public float numLightsTurningOff=4f;
 	public MazeCell[,,] cells;
 	private Pathfinding path;
+	public String test;
 
 
 	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells) {
@@ -17,20 +18,26 @@ public class LightSystem:MonoBehaviour {
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
 
+	void Awake(){
+		this.test = "stay";
+	}
+
 
 	void Update() {
 		keyTime -= Time.deltaTime;
+		if (this.cells != null) {
 
-		//print(cells.GetLength(0));
-		for (int i=0; i<cells.GetLength(0); ++i)
-			for (int j=0; j<cells.GetLength(1); ++j)
-				for(int k =0; k < cells.GetLength(2); k++)
-					if(cells[i,j,k] != null) {
-						byte value = (byte)Mathf.Max (Mathf.Min (GetLightAtPoint(i, j, k), 255), 0);
-						cells[i, j, k].SetBrightness(new Color32(value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
-					}
-
-		//cells [1, 0, 1].SetBrightness (Color.white);
+			//print(cells.GetLength(0));
+			/*for (int i=1; i<this.cells.GetLength(0)-1; ++i)
+				for (int j=1; j<cells.GetLength(1)-1; ++j)
+					for (int k =1; k < cells.GetLength(2)-1; k++)
+						if (cells [i, j, k] != null) {
+							byte value = (byte)Mathf.Max (Mathf.Min (GetLightAtPoint (i, j, k), 255), 0);
+							cells [i, j, k].SetBrightness (new Color32 (value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+						}
+			*/
+			//cells [1, 0, 1].SetBrightness (Color.white);
+		}
 	}
 
 	/// <summary>
