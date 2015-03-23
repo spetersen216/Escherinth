@@ -7,22 +7,31 @@ public class MazeStructure {
 	private bool[,,] data;
 	private Point3 door;
 	private Point3 key;
+	private int length;
 	
 	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back) {
 		// initialize data
 		this.mazeTool = top;
-		data = new bool[6+mazeTool.walls.GetLength(0), 6+mazeTool.walls.GetLength(0), 6+mazeTool.walls.GetLength(1)];
+		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
 			for (int j=0; j<data.GetLength(1); ++j)
 				for (int k=0; k<data.GetLength(2); ++k)
 					data[i, j, k] = true;
 		
-		MazeTool[,] tools = new MazeTool[,]{{right, top, front}, {left, bottom, back}};
+		// verify that MazeTools have the same dimensions
+		length = top.walls.GetLength(0);
+		if (top.walls.GetLength(0)!=length || top.walls.GetLength(1)!=length ||
+			bottom.walls.GetLength(0)!=length || bottom.walls.GetLength(1)!=length ||
+			left.walls.GetLength(0)!=length || left.walls.GetLength(1)!=length ||
+			right.walls.GetLength(0)!=length || right.walls.GetLength(1)!=length ||
+			front.walls.GetLength(0)!=length || front.walls.GetLength(1)!=length ||
+			back.walls.GetLength(0)!=length || back.walls.GetLength(1)!=length)
+				throw new Exception("MazeTool lengths don't match.");
 
 		// parse all the mazeTools
 		int high = data.GetLength(0)-2;
-		ParseMazeTool(bottom, (i, j) => new Point3(i+1, 1, j+1));
 		ParseMazeTool(top, (i, j) => new Point3(i+1, high, high-j));
+		ParseMazeTool(bottom, (i, j) => new Point3(i+1, 1, j+1));
 		ParseMazeTool(left, (i, j) => new Point3(1, j+1, i+1));
 		ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
 		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
@@ -309,21 +318,17 @@ public class MazeStructure {
 	/// radius is the radius of the sphere.
 	/// </summary>
 	public static Vector3 Vector3FromCubeToSphere(Vector3 v, int length, Vector3 floor, float radius=-1) {
-		//return v;
 		// handle radius
 		if (radius<0)
 			radius = length/2;
-		Debug.Log("0 - original: "+v+" (mag="+v.magnitude+")");
-		Debug.Log("1 - floor: "+floor+" (mag="+floor.magnitude+")");
+
 		// translate v, center into a cube around Vector3.zero
 		Vector3 center = Vector3.one*(length/2);
 		v -= center;
 		floor -= center;
-		Debug.Log("2 - translated: "+floor+" (mag="+floor.magnitude+")");
 
 		// calculate the result
 		v = floor.normalized*radius*(1-(v-floor).magnitude/length);
-		Debug.Log("3 - result: "+v+" (mag="+v.magnitude+")");
 		return v;
 	}
 
@@ -336,22 +341,14 @@ public class MazeStructure {
 		// handle radius
 		if (radius<0)
 			radius = length/2;
-		Debug.Log("3 - result: "+v+" (mag="+v.magnitude+")");
 		// morph into a cube around Vector3.zero
 		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
-		/*Vector3 norm = Vector3.zero;
-		if (max>(length/2-1)) {
-			max = 0;
-			if (!(Mathf.Abs(v.x)>(length/2-1) ^ Mathf.Abs(v.y)>(length/2-1) ^ Mathf.Abs(v.z)>(length/2-1)))
-				max = 0;
-		}*/
 		Vector3 floor = v*(0.5f*length/max);
-		Debug.Log("2 - to translate: "+floor+" (mag="+floor.magnitude+")");
 
 		// translate into a cube with Vector3.zero as the base corner
 		Vector3 center = Vector3.one*(length/2);
 		floor += center;
-		Debug.Log("1 - floor: "+floor+" (mag="+floor.magnitude+")");
+
 		// return floor + the appropriate height
 		float height = radius-v.magnitude;
 		if (floor.x<floor.y && floor.x<floor.z)
@@ -360,11 +357,13 @@ public class MazeStructure {
 			v = floor+(height*Vector3.forward);
 		else
 			v = floor+(height*Vector3.up);
-		Debug.Log("0 - original: "+v+" (mag="+v.magnitude+")");
 		return v;
 	}
 
 	public Vector3 Move(Vector3 from, Vector3 to) {
+		//from = Vector3FromSphereToCube(from, length, 50);
+		//to = Vector3FromSphereToCube(to, length, 50);
+		//Point3 a = FromCubeToData
 		return to;
 	}
 
@@ -378,21 +377,16 @@ public class MazeStructure {
 		MazeCell[,,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
 		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
 		visited.Initialize();
-for (int i=0; i<visited.GetLength(0); ++i)
+/*for (int i=0; i<visited.GetLength(0); ++i)
 	for (int j=0; j<visited.GetLength(1); ++j)
 		for (int k=0; k<visited.GetLength(2); ++k)
 			visited[i, j, k] = true;
 		for (int i=0; i<3; ++i)
 			for (int j=0; j<3; ++j)
 				for (int k=0; k<3; ++k)
-					visited[i, j, k] = false;
+					visited[i, j, k] = false;*/
 		int count=0;
 
-		/*UnityEngine.Random.seed = 123456;
-		Vector3 rand = new Vector3(0, 10, UnityEngine.Random.Range(0f, 10f));
-		Vector3 pos = rand*UnityEngine.Random.Range(0f, 1f);
-		Debug.Log("f("+pos+", "+rand+") = "+Vector3FromSphereToCube(Vector3FromCubeToSphere(pos, 10, rand, 20), 10, 20));
-		throw new Exception("breakpoint");*/
 		// iterate over {x, y, z}
 		for (int yIndex=0; yIndex<3; ++yIndex) {
 			// iterate over both sides of the given axis

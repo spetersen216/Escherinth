@@ -65,13 +65,6 @@ public class MazeCell:MonoBehaviour {
 			Vector3 floor = vectors.Translate(verts[i], false);
 			verts[i] = vectors.Translate(verts[i], true);
 			verts[i] = MazeStructure.Vector3FromCubeToSphere(verts[i], 10, floor, 50);
-			// compare vectors
-			Vector3 v1 = (100*m.vertices[i]) + new Vector3(1, 0, 1);
-			v1 = vectors.Translate(v1, true);
-			Vector3 v2 = MazeStructure.Vector3FromSphereToCube(verts[i], 10, 50);
-			print("vert: ("+v1.x+", "+v1.y+", "+v1.z+") -> ("+v2.x+", "+v2.y+", "+v2.z+")");
-			if ((v1-v2).magnitude>0.01f)
-				throw new Exception("e");
 		}
 		result.vertices = verts;
 
