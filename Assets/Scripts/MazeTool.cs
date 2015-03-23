@@ -405,6 +405,7 @@ public class MazeTool:MonoBehaviour {
 					if (walls[i, j]!=null && activeGameObject==cells[i, j].gameObject) {
 						ToggleWall(i, j);
 						activeGameObject = (focusOnThis?gameObject:null);
+						_toString = toString = ToString();
 						return;
 					}
 				}

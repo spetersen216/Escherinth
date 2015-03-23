@@ -20,8 +20,14 @@ public class MazeStructure {
 		MazeTool[,] tools = new MazeTool[,]{{right, top, front}, {left, bottom, back}};
 
 		// parse all the mazeTools
-
-		for (int i=0; i<mazeTool.walls.GetLength(0); ++i) {
+		int high = data.GetLength(0)-2;
+		ParseMazeTool(bottom, (i, j) => new Point3(i+1, 1, j+1));
+		ParseMazeTool(top, (i, j) => new Point3(i+1, high, high-j));
+		ParseMazeTool(left, (i, j) => new Point3(1, j+1, i+1));
+		ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
+		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
+		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
+		/*for (int i=0; i<mazeTool.walls.GetLength(0); ++i) {
 			for (int j=0; j<mazeTool.walls.GetLength(1); ++j) {
 				// parse walls
 				if (mazeTool.walls[i, j]!=null) {
@@ -36,12 +42,38 @@ public class MazeStructure {
 						key = new Point3(i+1, 1, j+1);
 				}
 			}
-		}
+		}*/
 		
 		
 		key = new Point3(9, 1, 9);
 		door = new Point3(2, 1, 1);
 		Debug.Log("key is at "+key);
+	}
+
+	/// <summary>
+	/// Parses the given maze, and fits it into the data based off of the translate function.
+	/// </summary>
+	private void ParseMazeTool(MazeTool maze, Func<int, int, Point3> translate) {
+		for (int i=0; i<maze.walls.GetLength(0); ++i) {
+			for (int j=0; j<maze.walls.GetLength(1); ++j) {
+				Point3 pos = translate(i, j);
+
+				// parse walls
+				MazeToolWall wall = maze.walls[i, j];
+				if (wall!=null) {
+					data[pos.x, pos.y, pos.z] = wall.gameObject.activeSelf;
+					if (wall.type==MazeToolWall.WallType.door)
+						door = pos;
+				}
+
+				// parse cells
+				MazeToolCell cell = maze.cells[i, j];
+				if (cell!=null) {
+					if (cell.type==MazeToolCell.CellType.key)
+						key = pos;
+				}
+			}
+		}
 	}
 
 	/// <summary>
@@ -281,14 +313,18 @@ public class MazeStructure {
 		// handle radius
 		if (radius<0)
 			radius = length/2;
-
+		Debug.Log("0 - original: "+v+" (mag="+v.magnitude+")");
+		Debug.Log("1 - floor: "+floor+" (mag="+floor.magnitude+")");
 		// translate v, center into a cube around Vector3.zero
 		Vector3 center = Vector3.one*(length/2);
 		v -= center;
 		floor -= center;
+		Debug.Log("2 - translated: "+floor+" (mag="+floor.magnitude+")");
 
 		// calculate the result
-		return floor.normalized*(radius-(v-floor).magnitude);
+		v = floor.normalized*radius*(1-(v-floor).magnitude/length);
+		Debug.Log("3 - result: "+v+" (mag="+v.magnitude+")");
+		return v;
 	}
 
 	/// <summary>
@@ -300,23 +336,32 @@ public class MazeStructure {
 		// handle radius
 		if (radius<0)
 			radius = length/2;
-
+		Debug.Log("3 - result: "+v+" (mag="+v.magnitude+")");
 		// morph into a cube around Vector3.zero
-		float max = Mathf.Max(v.x, v.y, v.z);
+		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+		/*Vector3 norm = Vector3.zero;
+		if (max>(length/2-1)) {
+			max = 0;
+			if (!(Mathf.Abs(v.x)>(length/2-1) ^ Mathf.Abs(v.y)>(length/2-1) ^ Mathf.Abs(v.z)>(length/2-1)))
+				max = 0;
+		}*/
 		Vector3 floor = v*(0.5f*length/max);
+		Debug.Log("2 - to translate: "+floor+" (mag="+floor.magnitude+")");
 
 		// translate into a cube with Vector3.zero as the base corner
 		Vector3 center = Vector3.one*(length/2);
 		floor += center;
-
+		Debug.Log("1 - floor: "+floor+" (mag="+floor.magnitude+")");
 		// return floor + the appropriate height
 		float height = radius-v.magnitude;
 		if (floor.x<floor.y && floor.x<floor.z)
-			return floor+(height*Vector3.right);
+			v = floor+(height*Vector3.right);
 		else if (floor.y<floor.z)
-			return floor+(height*Vector3.forward);
+			v = floor+(height*Vector3.forward);
 		else
-			return floor+(height*Vector3.up);
+			v = floor+(height*Vector3.up);
+		Debug.Log("0 - original: "+v+" (mag="+v.magnitude+")");
+		return v;
 	}
 
 	public Vector3 Move(Vector3 from, Vector3 to) {
@@ -333,16 +378,21 @@ public class MazeStructure {
 		MazeCell[,,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
 		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
 		visited.Initialize();
-		/*for (int i=0; i<visited.GetLength(0); ++i)
-			for (int j=0; j<visited.GetLength(1); ++j)
-				for (int k=0; k<visited.GetLength(2); ++k)
-					visited[i, j, k] = true;
+for (int i=0; i<visited.GetLength(0); ++i)
+	for (int j=0; j<visited.GetLength(1); ++j)
+		for (int k=0; k<visited.GetLength(2); ++k)
+			visited[i, j, k] = true;
 		for (int i=0; i<3; ++i)
 			for (int j=0; j<3; ++j)
 				for (int k=0; k<3; ++k)
-					visited[i, j, k] = false;*/
+					visited[i, j, k] = false;
 		int count=0;
-		
+
+		/*UnityEngine.Random.seed = 123456;
+		Vector3 rand = new Vector3(0, 10, UnityEngine.Random.Range(0f, 10f));
+		Vector3 pos = rand*UnityEngine.Random.Range(0f, 1f);
+		Debug.Log("f("+pos+", "+rand+") = "+Vector3FromSphereToCube(Vector3FromCubeToSphere(pos, 10, rand, 20), 10, 20));
+		throw new Exception("breakpoint");*/
 		// iterate over {x, y, z}
 		for (int yIndex=0; yIndex<3; ++yIndex) {
 			// iterate over both sides of the given axis
@@ -374,17 +424,13 @@ public class MazeStructure {
 							throw new Exception("count>1000");
 
 						// create a vector space
-						Vector3 a, x1, x2, y, z1, z2;
-						a = (p-1).ToVector3()/2;
-						a[yIndex] = (side==1?(side-1)/2:(side+1)/2);
-						x1 = Vector3.zero;
-						x1[xIndex] = 1;
-						y = Vector3.zero;
-						y[yIndex] = (side==1?1:-1);
-						z1 = Vector3.zero;
-						z1[zIndex] = 1;
-						x2 = x1;
-						z2 = z1;
+						MazeCell.VectorSpaceish v = new MazeCell.VectorSpaceish();
+						v.AddAll((p-1).ToVector3()/2);
+						v.AddAll((side==1?(side-1)/2:(side+1)/2) - (p[yIndex]-1)/2f, yIndex);
+						v.AddX1(1, xIndex);
+						float yDiff = (side==1?1:-1);
+						v.vy[yIndex] = yDiff;
+						v.AddZ1(1, zIndex);
 
 						// find cellWallIndex using a 2D point space
 						int cellWallIndex=0;
@@ -394,58 +440,55 @@ public class MazeStructure {
 						forward[zIndex] = 2;
 
 						// calculate the index of cellWalls and cellWallTops to use
-						cellWallIndex += ValidMove(p, p+forward)?8:0;
-						cellWallIndex += ValidMove(p, p+right)?4:0;
-						cellWallIndex += ValidMove(p, p-forward)?2:0;
-						cellWallIndex += ValidMove(p, p-right)?1:0;
+						cellWallIndex += ValidMove(p, p+right)?0:8;
+						cellWallIndex += ValidMove(p, p+forward)?0:4;
+						cellWallIndex += ValidMove(p, p-right)?0:2;
+						cellWallIndex += ValidMove(p, p-forward)?0:1;
 
 						// if the cell is on an edge, modify the vector space and cellWallIndex
 						if ((i==1||i==data.GetLength((yIndex+1)%3)-2) || (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
 							// modify the vector space
 							if (i==1) {
-								a[yIndex] += y[yIndex];
-								x1[yIndex] -= y[yIndex];
+								v.AddX0(yDiff, yIndex);
+								v.vy[xIndex] = 1;
 							} else if (i==data.GetLength((yIndex+1)%3)-2) {
-								x1[yIndex] += y[yIndex];
+								v.AddX1(yDiff, yIndex);
+								v.vy[xIndex] = -1;
 							} else if (j==1) {
-								a[yIndex] += y[yIndex];
-								z1[yIndex] -= y[yIndex];
+								v.AddZ0(yDiff, yIndex);
+								v.vy[zIndex] = 1;
 							} else if (j==data.GetLength((yIndex+1)%3)-2) {
-								z1[yIndex] += y[yIndex];
+								v.AddZ1(yDiff, yIndex);
+								v.vy[zIndex] = -1;
 							}
-							x2 = x1;
-							z2 = z1;
+							v.vy.Normalize();
 
 							// calculate the index of cellWalls and cellWallTops to use
-							cellWallIndex=0;
-							cellWallIndex += ValidMove(p, p+forward)?8:0;
-							cellWallIndex += ValidMove(p, p+right)?4:0;
-							cellWallIndex += ValidMove(p, p-forward)?2:0;
-							cellWallIndex += ValidMove(p, p-right)?1:0;
 						}
 
 						// if the cell is on a corner, corner vector space
 						if ((i==1||i==data.GetLength((yIndex+1)%3)-2) && (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
 							// modify the vector space
 							if (i==1 && j==1) {
-								a[xIndex] += 1;
-								x1[zIndex] += 1;
-								//x2[yIndex] -= y[yIndex];
-								Debug.Log("i==1 && j==1 "+p);
+								v.v10[yIndex] += yDiff;
+								v.v00[xIndex] += 1;
+								v.vy[zIndex] = v.vy[xIndex];
 							} else if (i==1 && j==data.GetLength((yIndex+2)%3)-2) {
-
+								v.v11[yIndex] += yDiff;
+								v.v01[xIndex] += 1;
+								v.vy[zIndex] = -v.vy[xIndex];
 							} else if (i==data.GetLength((yIndex+1)%3)-2 && j==1) {
-
+								v.v00[yIndex] += yDiff;
+								v.v10[xIndex] -= 1;
+								v.vy[zIndex] = -v.vy[xIndex];
 							} else {
-
+								v.v01[yIndex] += yDiff;
+								v.v11[xIndex] -= 1;
+								v.vy[zIndex] = v.vy[xIndex];
 							}
+							v.vy.Normalize();
 
 							// calculate the index of cellWalls and cellWallTops to use
-							cellWallIndex=0;
-							cellWallIndex += ValidMove(p, p+forward)?8:0;
-							cellWallIndex += ValidMove(p, p+right)?4:0;
-							cellWallIndex += ValidMove(p, p-forward)?2:0;
-							cellWallIndex += ValidMove(p, p-right)?1:0;
 						}
 
 						// create the MazeCell
@@ -453,7 +496,7 @@ public class MazeStructure {
 						cell.transform.parent = parent.transform;
 						//Debug.Log("wellWallIndex: "+cellWallIndex);
 						cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
-							cellWallTopMat, flicker, a, x1, x2, y, z1, z2);
+							cellWallTopMat, flicker, v);
 						result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = cell;
 					}
 				}
