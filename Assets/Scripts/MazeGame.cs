@@ -31,6 +31,7 @@ public class MazeGame : MonoBehaviour {
 	public GameObject monster;
 	public Pathfinding temp;
 	private MazeCell[,,] cells;
+	private GameObject mazeSphere;
 	public Point3[] points;
 
 	// Use this for initialization
@@ -42,7 +43,14 @@ public class MazeGame : MonoBehaviour {
 		right.Start ();
 		back.Start ();
 		front.Start ();
-		
+		bottom.displayBorders = false;
+		top.displayBorders = false;
+		back.displayBorders = false;
+		top.gameObject.transform.localPosition = new Vector3(0,114.5f,93.6f);
+		top.gameObject.transform.rotation = Quaternion.Euler (180, 0, 0);
+
+		back.gameObject.transform.localPosition = new Vector3(-1.6f,103.5f,-10.1f);
+		back.gameObject.transform.rotation = Quaternion.Euler (90, 0, 0);
 		mazeStruct = new MazeStructure (top, bottom, left, right, front, back);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
@@ -58,11 +66,13 @@ public class MazeGame : MonoBehaviour {
 		  //                                    lightFlicker, Vector3.one, new Vector3(1,1,1), new Vector3(1,1,1), new Vector3(1,1,1));
 		//cells = new MazeCell[2,2,2];
 		//cells [0, 0, 0] = cell;
-		lights.Init(mazeStruct,cells);
+		//lights.Init(mazeStruct,cells);
+
 		door = mazeStruct.GetDoor();
 		monster = (GameObject)Instantiate(monster.gameObject, player_control.transform.localPosition, Quaternion.identity);
-
-
+		mazeSphere = GameObject.Find ("Maze-Sphere Container");
+		mazeSphere.transform.localScale = new Vector3 (9.5f, 9.5f, 9.5f);
+		mazeSphere.transform.localPosition = new Vector3 (-9.2f, .15f, -9.6f);
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
@@ -77,17 +87,17 @@ public class MazeGame : MonoBehaviour {
 		player.GetComponentInChildren<LightFlicker> ().enabled = false;
 		player.GetComponentInChildren<Light> ().enabled = false;
 
-		Debug.Log ("t estingalnflkasdflkj");
+		//Debug.Log ("t estingalnflkasdflkj");
 		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
 		
 		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 
-		points = temp.PathToPoint(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z)));
+		//points = temp.PathToPoint(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z)));
 		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
 
 		//}
 
-		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));
+//		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));
 
 	//	temp.
 		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
