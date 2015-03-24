@@ -18,8 +18,9 @@ public class RunTime : MonoBehaviour {
 		this.key = key;
 		this.radius = radius;
 		this.mazeStruct = mazeStruct;
-		transform.position = MazeStructure.Vector3FromCubeToSphere(mazeStruct.GetStart()[0].ToVector3(), 
-		                                                           mazeStruct.length, mazeStruct.GetStart()[0].ToVector3(), radius);
+		//transform.position = MazeStructure.Vector3FromCubeToSphere(mazeStruct.GetStart()[0].ToVector3(), 
+			//mazeStruct.length, mazeStruct.GetStart()[0].ToVector3(), radius);
+		transform.position = Vector3.up*radius;
 		//transform.localRotation = ; 
 		skyboxMaterial = mat;
 		mat.SetColor("_Tint", new Color32 ((byte)128,(byte)128,(byte)128,(byte)128));
@@ -27,30 +28,32 @@ public class RunTime : MonoBehaviour {
 	}
 
 	void Update(){
+		// handle camera angle (from mouse movement)
+		transform.Rotate(transform.up, -Input.GetAxis("Mouse X")*10);
+		transform.Rotate(transform.right, Input.GetAxis("Mouse Y")*10);
 
-		/*Vector3 angle = transform.eulerAngles;
-		angle.y += Input.GetAxis("Mouse X")*10;
-		angle.x -= Input.GetAxis("Mouse Y")*10;
-		transform.eulerAngles = angle;*/
+		// calculate forwards
+		Vector3 forwards = Vector3.RotateTowards(-transform.position, transform.forward, Mathf.PI/2, 1).normalized;
+		if (Vector3.Angle(-transform.position, forwards)<90)
+			forwards = Vector3.RotateTowards(transform.position, transform.forward, Mathf.PI/2, 1).normalized;
 
-
+		// sum the WASD/Arrows movement
 		float forward = 0, right = 0;
-	
-		if(Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow)){
-			forward += 1;
-		}else if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)){
-			right += 1;
-		}else if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)){
-			right += -1;
-		}else if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)){
-			forward += -1;
-		}
+		if(Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
+			forward += 0.1f;
+		else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+			forward -= 0.1f;
+		else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			right += 0.1f;
+		else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			right -= 0.1f;
 
-		Vector3 dest = forward * transform.forward + right * transform.right;
-		
-		transform.position = mazeStruct.Move (transform.position, dest).normalized * (radius - 0);
-		//transform.localRotation = Quaternion.LookRotation (transform.forward, -transform.position);
+		// calculate where to move, then move
+		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
+		transform.position = mazeStruct.Move(transform.position, dest).normalized * (radius-5);
 
+		// aim the rotation forwards
+		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
 	}
 
 

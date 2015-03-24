@@ -291,13 +291,6 @@ public class MazeStructure {
 	}
 
 	/// <summary>
-	/// Takes a Point3 in data-space and returns the corresponding Vector3 in cube-space.
-	/// </summary>
-	public static Vector3 FromDataToCube(Point3 p, int length) {
-		return p.ToVector3()/2;
-	}
-
-	/// <summary>
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
 	public static Point3 FromCubeToGame(Vector3 v, int length) {
@@ -309,13 +302,6 @@ public class MazeStructure {
 	/// </summary>
 	public static Vector3 FromGameToCube(Point3 p, int length) {
 		return p.ToVector3();
-	}
-
-	/// <summary>
-	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in data-space.
-	/// </summary>
-	public static Point3 FromCubeToData(Vector3 v, int length) {
-		return new Point3(2*v);
 	}
 
 	/// <summary>

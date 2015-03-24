@@ -75,9 +75,6 @@ public class MazeGame : MonoBehaviour {
 
 		door = mazeStruct.GetDoor();
 		monster = (GameObject)Instantiate(monster.gameObject, player_control.transform.localPosition, Quaternion.identity);
-		mazeSphere = GameObject.Find ("Maze-Sphere Container");
-		//mazeSphere.transform.localScale = new Vector3 (9.5f, 9.5f, 9.5f);
-		mazeSphere.transform.localPosition = new Vector3 (21f, 24f, -15f);
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
