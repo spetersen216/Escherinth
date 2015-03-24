@@ -7,9 +7,11 @@ public class MazeStructure {
 	private bool[,,] data;
 	private Point3 door;
 	private Point3 key;
-	private int length;
+	public int length;
+	public float radius;
+	private Point3 startPos;
 	
-	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back) {
+	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, float radius) {
 		// initialize data
 		this.mazeTool = top;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
@@ -19,6 +21,7 @@ public class MazeStructure {
 					data[i, j, k] = true;
 		
 		// verify that MazeTools have the same dimensions
+		this.radius = radius;
 		length = top.walls.GetLength(0);
 		if (top.walls.GetLength(0)!=length || top.walls.GetLength(1)!=length ||
 			bottom.walls.GetLength(0)!=length || bottom.walls.GetLength(1)!=length ||
@@ -53,7 +56,7 @@ public class MazeStructure {
 			}
 		}*/
 		
-		
+		startPos = new Point3(3, 1, 3);
 		key = new Point3(9, 1, 9);
 		door = new Point3(2, 1, 1);
 		Debug.Log("key is at "+key);
@@ -219,6 +222,10 @@ public class MazeStructure {
 	/// </summary>
 	public GameObject GetDoor() {
 		return mazeTool.walls[door.x-1, door.y-1].gameObject;
+	}
+
+	public Point3[] GetStart(){
+		return Point3FromDataToGame(startPos);
 	}
 	
 	/// <summary>

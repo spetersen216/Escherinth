@@ -23,7 +23,7 @@ public class MazeGame : MonoBehaviour {
 	public float radius;
 	public Key key;
 	public GameObject door;
-	public OVRPlayerController player_control;
+	public GameObject player_control;
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
 	public GameObject right_cam;
@@ -43,15 +43,20 @@ public class MazeGame : MonoBehaviour {
 		right.Start ();
 		back.Start ();
 		front.Start ();
-		bottom.displayBorders = false;
+
+		/*bottom.displayBorders = false;
 		top.displayBorders = false;
 		back.displayBorders = false;
+
 		top.gameObject.transform.localPosition = new Vector3(0,114.5f,93.6f);
 		top.gameObject.transform.rotation = Quaternion.Euler (180, 0, 0);
 
 		back.gameObject.transform.localPosition = new Vector3(-1.6f,103.5f,-10.1f);
 		back.gameObject.transform.rotation = Quaternion.Euler (90, 0, 0);
-		mazeStruct = new MazeStructure (top, bottom, left, right, front, back);
+		*/
+
+
+		mazeStruct = new MazeStructure (top, bottom, left, right, front, back, radius);
 
 		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
 		position.Scale(bottom.transform.localScale);
@@ -71,8 +76,8 @@ public class MazeGame : MonoBehaviour {
 		door = mazeStruct.GetDoor();
 		monster = (GameObject)Instantiate(monster.gameObject, player_control.transform.localPosition, Quaternion.identity);
 		mazeSphere = GameObject.Find ("Maze-Sphere Container");
-		mazeSphere.transform.localScale = new Vector3 (9.5f, 9.5f, 9.5f);
-		mazeSphere.transform.localPosition = new Vector3 (-9.2f, .15f, -9.6f);
+		//mazeSphere.transform.localScale = new Vector3 (9.5f, 9.5f, 9.5f);
+		mazeSphere.transform.localPosition = new Vector3 (21f, 24f, -15f);
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3 (1, 1.11f, 1), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
@@ -83,7 +88,7 @@ public class MazeGame : MonoBehaviour {
 			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
 		right_cam.gameObject.AddComponent<Skybox>().material = 
 			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
-		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material);
+		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material, radius, mazeStruct);
 		player.GetComponentInChildren<LightFlicker> ().enabled = false;
 		player.GetComponentInChildren<Light> ().enabled = false;
 
@@ -91,13 +96,13 @@ public class MazeGame : MonoBehaviour {
 		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
 		
 		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
-
-		//points = temp.PathToPoint(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z)));
+		Debug.Log (position);
+		//points = temp.PathToPoint(monster);
 		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
 
 		//}
 
-//		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));
+		//Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(position)));
 
 	//	temp.
 		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
