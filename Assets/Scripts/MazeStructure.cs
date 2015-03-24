@@ -95,120 +95,6 @@ public class MazeStructure {
 		Point3 avg = (p1+p2)/2;
 		return !data[avg.x, avg.y, avg.z];
 	}
-
-	/// <summary>
-	/// Returns a new GameObject that contains the 3D walls for the game
-	/// </summary>
-	public GameObject CreateWalls() {
-		GameObject result = new GameObject("Walls");
-		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
-		visited.Initialize();
-		int count=0;
-
-		// iterate over {x, y, z}
-		for (int axis=0; axis<3; ++axis) {
-			// iterate over both sides of the given axis
-			for (int side=1; side<data.GetLength(axis); side+=data.GetLength(axis)-3) {
-				// create the parent object
-				GameObject parent = new GameObject("bottom");
-				parent.transform.parent = result.transform;
-				//if (axis!=1 || side!=1)
-					//continue;
-
-				// iterate over all cells in the given axis
-				for (int i=1; i<data.GetLength((axis+1)%3); i+=2) {
-					for (int j=1; j<data.GetLength((axis+2)%3); j+=2) {
-						// create a Point3 that corresponds to the current location
-						Point3 p = Point3.zero;
-						p[axis] = side;
-						p[(axis+1)%3] = i;
-						p[(axis+2)%3] = j;
-
-						if (++count>1000)
-							throw new Exception("count>200");
-
-						// if the cell hasn't been created...
-						if (!visited[p.x, p.y, p.z]) {
-							Vector3 a = (p-1).ToVector3()/2;
-							a[axis] = (side==1?(side-1)/2:(side+1)/2);
-							Vector3 x = Vector3.zero;
-							x[(axis+(side==1?1:2))%3] = 1;
-							Vector3 y = Vector3.zero;
-							//y[axis] = (side+1)/2-a[axis];
-							y[axis] = (side==1?1:-1);
-							Vector3 z = Vector3.zero;
-							z[(axis+(side==1?2:1))%3] = 1;
-
-							// create GameObject with a mesh for the given MazeCell
-							GameObject cell = new GameObject("Maze Cell @"+p.ToString());
-							cell.transform.parent = parent.transform;
-
-							// create the floor
-							{
-								GameObject floor = new GameObject("floor");
-								floor.transform.parent = cell.transform;
-								int[] tris = new int[]{0, 1, 2, 3, 2, 1};
-								Vector3[] verts = new Vector3[]{
-									Vector3FromCubeToSphere(a, mazeTool.width, a, 50),
-									Vector3FromCubeToSphere(a+x, mazeTool.width, a+x, 50),
-									Vector3FromCubeToSphere(a+z, mazeTool.width, a+z, 50),
-									Vector3FromCubeToSphere(a+x+z, mazeTool.width, a+x+z, 50)
-								};
-								Vector3 normal = Vector3.Cross(x, y);
-								normal = Vector3.zero;
-								Vector3[] normals = new Vector3[]{normal, normal, normal, normal};
-								Vector2[] uvs = new Vector2[]{Vector2.zero, Vector2.right, Vector2.up, Vector2.one};
-								AddMesh(floor, tris, verts, normals, uvs);
-							}
-
-							// create walls
-							{
-								GameObject walls = new GameObject("walls");
-								walls.transform.parent = cell.transform;
-								int[] tris = new int[]{0,1,4, 1,5,4, 1,2,5, 2,6,5, 2,3,6, 3,7,6, 3,0,7, 0,4,7,
-									4,5,8, 5,9,8, 5,6,9, 6,10,9, 6,7,10, 7,11,10, 7,4,11, 4,8,11};
-								y *= 2;
-								Vector3[] verts = new Vector3[]{
-									Vector3FromCubeToSphere(a+y, mazeTool.width, a, 50),
-									Vector3FromCubeToSphere(a+x+y, mazeTool.width, a+x, 50),
-									Vector3FromCubeToSphere(a+x+z+y, mazeTool.width, a+x+z, 50),
-									Vector3FromCubeToSphere(a+z+y, mazeTool.width, a+z, 50),
-									Vector3FromCubeToSphere(a+(0.05f*x)+(0.05f*z)+y, mazeTool.width, a+(0.05f*x)+(0.05f*z), 50),
-									Vector3FromCubeToSphere(a+(0.95f*x)+(0.05f*z)+y, mazeTool.width, a+(0.95f*x)+(0.05f*z), 50),
-									Vector3FromCubeToSphere(a+(0.95f*x)+(0.95f*z)+y, mazeTool.width, a+(0.95f*x)+(0.95f*z), 50),
-									Vector3FromCubeToSphere(a+(0.05f*x)+(0.95f*z)+y, mazeTool.width, a+(0.05f*x)+(0.95f*z), 50),
-									Vector3FromCubeToSphere(a+(0.05f*x)+(0.05f*z), mazeTool.width, a+(0.05f*x)+(0.05f*z), 50),
-									Vector3FromCubeToSphere(a+(0.95f*x)+(0.05f*z), mazeTool.width, a+(0.95f*x)+(0.05f*z), 50),
-									Vector3FromCubeToSphere(a+(0.95f*x)+(0.95f*z), mazeTool.width, a+(0.95f*x)+(0.95f*z), 50),
-									Vector3FromCubeToSphere(a+(0.05f*x)+(0.95f*z), mazeTool.width, a+(0.05f*x)+(0.95f*z), 50)
-								};
-								Vector3 n = Vector3.zero;
-								Vector3[] normals = new Vector3[]{n, n, n, n, n, n, n, n, n, n, n, n};
-								Vector2 ze = Vector2.zero;
-								Vector2[] uvs = new Vector2[]{ze, ze, ze, ze, ze, ze, ze, ze, ze, ze, ze, ze};
-								AddMesh(walls, tris, verts, normals, uvs);
-								walls.renderer.material = mazeTool.wallMaterial;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	private Mesh AddMesh(GameObject obj, int[] tris, Vector3[] verts, Vector3[] normals, Vector2[] uvs) {
-		Mesh m = new Mesh();
-		m.vertices = verts;
-		m.normals = normals;
-		m.uv = uvs;
-		m.triangles = tris;
-		m.Optimize();
-		obj.AddComponent<MeshFilter>().mesh = m;
-		obj.AddComponent<MeshRenderer>().material = mazeTool.defaultDiffuse;
-		return m;
-	}
 	
 	/// <summary>
 	/// Returns Pathfinding to the given Point3.
@@ -224,10 +110,29 @@ public class MazeStructure {
 		return mazeTool.walls[door.x-1, door.y-1].gameObject;
 	}
 
-	public Point3[] GetStart(){
+	/// <summary>
+	/// Returns the sphere-space start location.
+	/// </summary>
+	public Vector3 GetStartSphere() {
+		Vector3 v = FromGameToCube(Point3FromDataToGame(startPos)[0]);
+		return Vector3FromCubeToSphere(v, length, v, radius);
+	}
+
+	/// <summary>
+	/// Returns the game-space start location.
+	/// </summary>
+	public Point3[] GetStart() {
 		return Point3FromDataToGame(startPos);
 	}
 	
+	/// <summary>
+	/// Returns the sphere-space location of the door.
+	/// </summary>
+	public Vector3 FindDoorSphere() {
+		Vector3 v = FromGameToCube(Point3FromDataToGame(door)[0]);
+		return Vector3FromCubeToSphere(v, length, v, radius);
+	}
+
 	/// <summary>
 	/// Returns the game-space location of the door.
 	/// </summary>
@@ -236,27 +141,18 @@ public class MazeStructure {
 	}
 
 	/// <summary>
+	/// Returns the sphere-space location of the key.
+	/// </summary>
+	public Vector3 FindKeySphere() {
+		Vector3 v = FromGameToCube(Point3FromDataToGame(key)[0]);
+		return Vector3FromCubeToSphere(v, length, v, radius);
+	}
+
+	/// <summary>
 	/// Returns the game-space location of the key.
 	/// </summary>
 	public Point3[] FindKey() {
 		return Point3FromDataToGame(key);
-	}
-	
-	public Light[,] GetLights(Func<GameObject> getLight) {
-		Light[,] result = new Light[mazeTool.width, mazeTool.height];
-		GameObject container = new GameObject("lights");
-		for (int i=0; i<result.GetLength(0); ++i) {
-			for (int j=0; j<result.GetLength(1); ++j) {
-				GameObject light = getLight();
-				light.name = "light "+(i+1)+" "+(j+1);
-				result[i, j] = light.GetComponent<Light>();
-				Vector3 v = new Vector3(i+0.5f, 1, j+0.5f);
-				v.Scale(mazeTool.transform.localScale);
-				light.transform.position = v;
-				light.transform.parent = container.transform;
-			}
-		}
-		return result;
 	}
 	
 	/// <summary>
@@ -293,14 +189,14 @@ public class MazeStructure {
 	/// <summary>
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
-	public static Point3 FromCubeToGame(Vector3 v, int length) {
+	public static Point3 FromCubeToGame(Vector3 v) {
 		return new Point3(v);
 	}
 
 	/// <summary>
 	/// Takes a Point3 in game-space and returns the corresponding Vector3 in cube-space.
 	/// </summary>
-	public static Vector3 FromGameToCube(Point3 p, int length) {
+	public static Vector3 FromGameToCube(Point3 p) {
 		return p.ToVector3();
 	}
 
@@ -354,9 +250,40 @@ public class MazeStructure {
 	}
 
 	public Vector3 Move(Vector3 from, Vector3 to) {
-		//from = Vector3FromSphereToCube(from, length, 50);
-		//to = Vector3FromSphereToCube(to, length, 50);
-		//Point3 a = FromCubeToData
+		/*Func<Vector3, Point3> convert = (v)=> Point3FromGameToData(new Point3[]{FromCubeToGame(Vector3FromSphereToCube(v, length, radius))});
+		Point3 start = convert(from.normalized*radius);
+		Point3 end = convert(to.normalized*radius);
+
+		// calculate offsets from "to"
+		Point3[] offsets = Point3.zero.neighbors();
+		for (int i=0; i<offsets.Length; ++i)
+			offsets[i] = convert(to+(offsets[i].ToVector3()/10));
+
+		// check if near an invalid wall
+		for (int i=0; i<offsets.Length; ++i) {
+			// count the number of different fields between offsets[i] and start
+			int diff=0;
+			for (int j=0; j<3; ++j)
+				if (offsets[i][j]!=start[j])
+					++diff;
+
+			// if no differences, continue
+			if (diff==0)
+				continue;
+
+			// if one difference, check if the move is valid
+			if (diff==1) {
+				if (ValidMove(start, offsets[i]))
+					continue;
+				else
+					return from;
+			}
+
+			// if multiple differences, move is invalid
+			if (diff==2)
+				return from;
+		}*/
+
 		return to;
 	}
 
