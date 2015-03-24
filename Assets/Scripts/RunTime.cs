@@ -9,6 +9,7 @@ public class RunTime : MonoBehaviour {
 	public Material skyboxMaterial;
 	private float radius;
 	private MazeStructure mazeStruct;
+	private float forward, right;
 
 
 	public void Init(LightSystem lights, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct)
@@ -23,34 +24,38 @@ public class RunTime : MonoBehaviour {
 		//transform.localRotation = ; 
 		skyboxMaterial = mat;
 		mat.SetColor("_Tint", new Color32 ((byte)128,(byte)128,(byte)128,(byte)128));
+		forward = 0;
+		right = 0;
 		//GetComponent<OVRPlayerController> ().GetComponentInChildren<Light> ().enabled = false;
 	}
 
 	void Update(){
 
-		/*Vector3 angle = transform.eulerAngles;
-		angle.y += Input.GetAxis("Mouse X")*10;
-		angle.x -= Input.GetAxis("Mouse Y")*10;
-		transform.eulerAngles = angle;*/
+		Vector3 angle = transform.eulerAngles;
+		angle.y += Input.GetAxis("Mouse X")*5;
+		angle.x -= Input.GetAxis("Mouse Y")*5;
+		transform.eulerAngles = angle;
 
 
-		float forward = 0, right = 0;
+
 	
-		if(Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow)){
+		if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow)) {
 			forward += 1;
-		}else if(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)){
+		} else if (Input.GetKey (KeyCode.D) || Input.GetKey (KeyCode.RightArrow)) {
 			right += 1;
-		}else if(Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)){
+		} else if (Input.GetKey (KeyCode.A) || Input.GetKey (KeyCode.LeftArrow)) {
 			right += -1;
-		}else if(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)){
+		} else if (Input.GetKey (KeyCode.S) || Input.GetKey (KeyCode.DownArrow)) {
 			forward += -1;
 		}
+			
+	
 
 		Vector3 dest = forward * transform.forward + right * transform.right;
 		
-		transform.position = mazeStruct.Move (transform.position, dest).normalized * (radius - 0);
-		//transform.localRotation = Quaternion.LookRotation (transform.forward, -transform.position);
-
+		transform.position = mazeStruct.Move (transform.position, dest).normalized * (radius +10);
+		transform.localRotation = Quaternion.LookRotation (transform.forward, Vector3.one);//-transform.position);
+		//right = 0;
 	}
 
 
