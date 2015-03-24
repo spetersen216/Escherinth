@@ -25,6 +25,7 @@ public class MazeCell:MonoBehaviour {
 		// create cell wall
 		wall = new GameObject("cell wall - "+cellWall.name);
 		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall, vectors, true);
+		wall.AddComponent<MeshCollider>().sharedMesh = wall.GetComponent<MeshFilter>().mesh;
 		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallMat);
 		wall.transform.parent = transform;
 

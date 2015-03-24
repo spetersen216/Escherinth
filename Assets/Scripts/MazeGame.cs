@@ -24,6 +24,7 @@ public class MazeGame:MonoBehaviour {
 	public Key key;
 	public GameObject door;
 	public GameObject player_control;
+	//private GameObject player_collider;
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
 	public GameObject right_cam;
@@ -33,6 +34,7 @@ public class MazeGame:MonoBehaviour {
 	private MazeCell[, ,] cells;
 	private GameObject mazeSphere;
 	public Point3[] points;
+	public Light cLight;
 
 	// Use this for initialization
 	void Start() {
@@ -58,11 +60,12 @@ public class MazeGame:MonoBehaviour {
 
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 
-		Vector3 position = mazeStruct.FindKey()[0].ToVector3()+new Vector3(-0.5f, -1, -0.5f);
-		position.Scale(bottom.transform.localScale);
-		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
+//		Vector3 position = mazeStruct.FindKey ();
+//		position.Scale(bottom.transform.localScale);
+		key = ((GameObject)Instantiate(key.gameObject, /*position*/new Vector3(-5.22f, 47.14f, 0), Quaternion.identity)).GetComponent<Key>();
 		key.transform.rotation = Quaternion.Euler(90, 0, 0);
 		key.transform.localPosition += new Vector3(0, 1.5f, 0);
+		cLight = ((GameObject)Instantiate (cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
@@ -74,11 +77,15 @@ public class MazeGame:MonoBehaviour {
 		//lights.Init(mazeStruct,cells);
 
 		door = mazeStruct.GetDoor();
-		monster = (GameObject)Instantiate(monster.gameObject, player_control.transform.localPosition, Quaternion.identity);
+
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
+		monster = (GameObject)Instantiate(monster.gameObject, new Vector3(0,-50,0), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
+		CapsuleCollider collider = player.AddComponent<CapsuleCollider> ();
 
+		collider.height = 2;
+		collider.center = new Vector3 (0, .4f, 0);
 		//monster.AddComponent<HUD> ().CameraFacing = left_cam.gameObject.GetComponent<Camera> ();
 
 		left_cam.gameObject.AddComponent<Skybox>().material = 
@@ -88,12 +95,14 @@ public class MazeGame:MonoBehaviour {
 		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material, radius, mazeStruct);
 		player.GetComponentInChildren<LightFlicker>().enabled = false;
 		player.GetComponentInChildren<Light>().enabled = false;
+		var rBody = player.AddComponent<Rigidbody> ();
+		rBody.useGravity = false;
 
 		//Debug.Log ("t estingalnflkasdflkj");
 		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
 
 		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
-		Debug.Log(position);
+//		Debug.Log(position);
 		//points = temp.PathToPoint(monster);
 		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
 

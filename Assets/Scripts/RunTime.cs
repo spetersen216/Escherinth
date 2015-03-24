@@ -49,7 +49,9 @@ public class RunTime:MonoBehaviour {
 
 		// calculate where to move, then move
 		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
-		transform.position = mazeStruct.Move(transform.position, dest).normalized * (radius-5);
+		//transform.position = mazeStruct.Move(transform.position, dest).normalized * (radius-5);
+		rigidbody.MovePosition(dest.normalized * (radius - 5));
+		rigidbody.velocity = Vector3.zero;
 
 		// aim the rotation forwards
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
@@ -58,6 +60,8 @@ public class RunTime:MonoBehaviour {
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
 	void OnTriggerEnter(Collider collider) {
+		Debug.Log (collider.name);
+
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
 			/*foreach(Light l in lights.cells)
@@ -65,12 +69,13 @@ public class RunTime:MonoBehaviour {
 				l.GetComponent<LightFlicker>().stopFlicker();
 			}*/
 			//Debug.Log("Collision with collection");
+			GameObject.Find ("CenterLight(Clone)").GetComponent<Light>().enabled = false;
 			door.SetActive(false);
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
 			print(skyboxMaterial.GetColor("_Tint"));
 			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
-			gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
+			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
 			gameObject.GetComponentInChildren<Light>().enabled = true;
 			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
 
