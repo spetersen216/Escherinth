@@ -83,7 +83,7 @@ public class MazeGame:MonoBehaviour {
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
 		CapsuleCollider collider = player.AddComponent<CapsuleCollider> ();
-
+		collider.material = (PhysicMaterial)Resources.Load ("WallPhysics", typeof(PhysicMaterial));
 		collider.height = 2;
 		collider.center = new Vector3 (0, .4f, 0);
 		//monster.AddComponent<HUD> ().CameraFacing = left_cam.gameObject.GetComponent<Camera> ();
