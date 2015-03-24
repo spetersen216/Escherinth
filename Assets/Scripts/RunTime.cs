@@ -19,7 +19,7 @@ public class RunTime:MonoBehaviour {
 		this.mazeStruct = mazeStruct;
 		//transform.position = MazeStructure.Vector3FromCubeToSphere(mazeStruct.GetStart()[0].ToVector3(), 
 		//mazeStruct.length, mazeStruct.GetStart()[0].ToVector3(), radius);
-		transform.position = Vector3.up*radius;
+		transform.position = Vector3.up*radius + Vector3.right*5 + Vector3.forward*5;
 		//transform.localRotation = ; 
 		skyboxMaterial = mat;
 		mat.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));

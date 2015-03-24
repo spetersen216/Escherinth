@@ -60,10 +60,11 @@ public class MazeGame:MonoBehaviour {
 
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 
-//		Vector3 position = mazeStruct.FindKey ();
-//		position.Scale(bottom.transform.localScale);
+		Vector3 position = mazeStruct.FindKeySphere ().normalized*(radius-5);
+		//position.Scale(bottom.transform.localScale);
+		Debug.Log (position);
 		key = ((GameObject)Instantiate(key.gameObject, /*position*/new Vector3(-5.22f, 47.14f, 0), Quaternion.identity)).GetComponent<Key>();
-		key.transform.rotation = Quaternion.Euler(90, 0, 0);
+		key.transform.rotation = Quaternion.Euler(270, 0, 0);
 		key.transform.localPosition += new Vector3(0, 1.5f, 0);
 		cLight = ((GameObject)Instantiate (cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
@@ -79,7 +80,7 @@ public class MazeGame:MonoBehaviour {
 		door = mazeStruct.GetDoor();
 
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
-		monster = (GameObject)Instantiate(monster.gameObject, new Vector3(0,-50,0), Quaternion.identity);
+		monster = (GameObject)Instantiate(monster.gameObject, new Vector3(4.79f,47.36f,-.038f), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
 		CapsuleCollider collider = player.AddComponent<CapsuleCollider> ();
@@ -102,13 +103,13 @@ public class MazeGame:MonoBehaviour {
 		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
 
 		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
-//		Debug.Log(position);
-		//points = temp.PathToPoint(monster);
+		Debug.Log(mazeStruct.FindKeySphere());
+		points = temp.PathToPoint(mazeStruct.FindKey()[0]);
 		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
 
 		//}
 
-		//Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(position)));
+		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(points[0]));
 
 		//	temp.
 		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
