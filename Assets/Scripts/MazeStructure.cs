@@ -41,7 +41,7 @@ public class MazeStructure {
 		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
 		
 		startPos = new Point3(3, 1, 3);
-		key = new Point3(9, 19, 11);
+		key = new Point3(5, 19, 5);
 		door = new Point3(2, 1, 1);
 		Debug.Log("key is at "+key);
 	}

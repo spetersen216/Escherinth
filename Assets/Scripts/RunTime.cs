@@ -39,19 +39,21 @@ public class RunTime:MonoBehaviour {
 		// sum the WASD/Arrows movement
 		float forward = 0, right = 0;
 		if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
-			forward += 0.1f;
-		else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-			forward -= 0.1f;
-		else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-			right += 0.1f;
-		else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-			right -= 0.1f;
+			forward += 0.4f;
+		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+			forward -= 0.4f;
+		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			right += 0.4f;
+		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			right -= 0.4f;
 
 		// calculate where to move, then move
 		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
 		//transform.position = mazeStruct.Move(transform.position, dest).normalized * (radius-5);
 		rigidbody.MovePosition(dest.normalized * (radius - 5));
-		rigidbody.velocity = Vector3.zero;
+		//rigidbody.MovePosition(rigidbody.position+rigidbody.velocity*2);
+		//rigidbody.velocity = Vector3.zero;
+		rigidbody.velocity/= 2;
 
 		// aim the rotation forwards
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
@@ -64,12 +66,7 @@ public class RunTime:MonoBehaviour {
 
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
-			/*foreach(Light l in lights.cells)
-			{
-				l.GetComponent<LightFlicker>().stopFlicker();
-			}*/
-			//Debug.Log("Collision with collection");
-			GameObject.Find ("CenterLight(Clone)").GetComponent<Light>().enabled = false;
+			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.1f;
 			door.SetActive(false);
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
@@ -79,6 +76,10 @@ public class RunTime:MonoBehaviour {
 			gameObject.GetComponentInChildren<Light>().enabled = true;
 			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
 
+			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			sphere.transform.localScale = new Vector3(90, 90, 90);
+			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
+			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
 		}
 	}
 }

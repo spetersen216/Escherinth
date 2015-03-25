@@ -28,14 +28,17 @@ public class LightSystem:MonoBehaviour {
 		if (this.cells != null) {
 
 			//print(cells.GetLength(0));
-			/*for (int i=1; i<this.cells.GetLength(0)-1; ++i)
-				for (int j=1; j<cells.GetLength(1)-1; ++j)
-					for (int k =1; k < cells.GetLength(2)-1; k++)
-						if (cells [i, j, k] != null) {
-							byte value = (byte)Mathf.Max (Mathf.Min (GetLightAtPoint (i, j, k), 255), 0);
-							cells [i, j, k].SetBrightness (new Color32 (value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+			for (int i=1; i<this.cells.GetLength(0); ++i) {
+				for (int j=1; j<cells.GetLength(1); ++j) {
+					for (int k =1; k<cells.GetLength(2); k++) {
+						if (cells[i, j, k] != null) {
+							byte value = (byte)Mathf.Max(Mathf.Min(GetLightAtPoint(i, j, k), 255), 0);
+							cells[i, j, k].SetBrightness(new Color32(value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
 						}
-			*/
+					}
+				}
+			}
+			
 			//cells [1, 0, 1].SetBrightness (Color.white);
 		}
 	}
@@ -44,7 +47,7 @@ public class LightSystem:MonoBehaviour {
 	/// Returns the appropriate brightness for the light at (i, j)
 	/// </summary>
 	private float GetLightAtPoint(int i, int j, int k) {
-		float result = path.GetDistanceToEnd(new Point3(i, j, k))+keyTime;
+		float result = path.GetDistanceToEnd(new Point3(i, j, k))*1.2f+keyTime;
 		result = brightness.Evaluate(1-result/numLightsTurningOff);
 		return 255*result;
 	}

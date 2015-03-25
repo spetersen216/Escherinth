@@ -60,22 +60,18 @@ public class MazeGame:MonoBehaviour {
 
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 
-		Vector3 position = mazeStruct.FindKeySphere ().normalized*(radius-5);
-		//position.Scale(bottom.transform.localScale);
+		Vector3 position = mazeStruct.FindKeySphere().normalized*(radius-5);
+		position = new Vector3(-5.22f, 47.14f, 0);
+		position = new Vector3(-21.12f, 38.91f, -20.73f);
 		Debug.Log (position);
-		key = ((GameObject)Instantiate(key.gameObject, /*position*/new Vector3(-5.22f, 47.14f, 0), Quaternion.identity)).GetComponent<Key>();
+		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
 		key.transform.rotation = Quaternion.Euler(270, 0, 0);
-		key.transform.localPosition += new Vector3(0, 1.5f, 0);
+		//key.transform.localPosition += new Vector3(0, 1.5f, 0);
 		cLight = ((GameObject)Instantiate (cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
-		//MazeCell cell = new GameObject("SingleCell").AddComponent<MazeCell>();
-		//cell.Init(new Point3(0,0,0),cellFloor,cellWalls[0], cellWallTops[0], cellFloorMat, cellWallMat, cellWallTopMat,
-		//                                    lightFlicker, Vector3.one, new Vector3(1,1,1), new Vector3(1,1,1), new Vector3(1,1,1));
-		//cells = new MazeCell[2,2,2];
-		//cells [0, 0, 0] = cell;
-		//lights.Init(mazeStruct,cells);
+		lights.Init(mazeStruct, cells);
 
 		door = mazeStruct.GetDoor();
 
