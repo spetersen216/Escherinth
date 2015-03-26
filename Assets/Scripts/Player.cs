@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RunTime:MonoBehaviour {
+public class Player:MonoBehaviour {
 
 	private LightSystem lights;
 	private GameObject door;
@@ -9,21 +9,32 @@ public class RunTime:MonoBehaviour {
 	public Material skyboxMaterial;
 	private float radius;
 	private MazeStructure mazeStruct;
+	private Monster monster;
 
-
-	public void Init(LightSystem lights, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct) {
+	public void Init(LightSystem lights, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster) {
 		this.lights = lights;
 		this.door = door;
 		this.key = key;
 		this.radius = radius;
+		this.monster = monster;
 		this.mazeStruct = mazeStruct;
+
+		// initialize this
 		//transform.position = MazeStructure.Vector3FromCubeToSphere(mazeStruct.GetStart()[0].ToVector3(), 
 		//mazeStruct.length, mazeStruct.GetStart()[0].ToVector3(), radius);
 		transform.position = Vector3.up*radius + Vector3.right*5 + Vector3.forward*5;
-		//transform.localRotation = ; 
 		skyboxMaterial = mat;
 		mat.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
-		//GetComponent<OVRPlayerController> ().GetComponentInChildren<Light> ().enabled = false;
+
+		// initialize other components
+		GetComponent<OVRCameraRig>().Init();
+		gameObject.AddComponent<Rigidbody>().useGravity = false;
+		GetComponentInChildren<LightFlicker>().enabled = false;
+		GetComponentInChildren<Light>().enabled = false;
+		CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider> ();
+		collider.material = (PhysicMaterial)Resources.Load ("WallPhysics", typeof(PhysicMaterial));
+		collider.height = 2;
+		collider.center = new Vector3 (0, .4f, 0);
 	}
 
 	void Update() {
@@ -85,6 +96,8 @@ public class RunTime:MonoBehaviour {
 			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
 			gameObject.GetComponentInChildren<Light>().enabled = true;
 			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
+
+			monster.Init(mazeStruct, transform, mazeStruct.GetStartSphere ());
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 			sphere.transform.localScale = new Vector3(90, 90, 90);

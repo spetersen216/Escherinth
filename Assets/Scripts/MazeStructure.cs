@@ -83,7 +83,7 @@ public class MazeStructure {
 	}
 	
 	/// <summary>
-	/// Returns Pathfinding to the given Point3.
+	/// Returns Pathfinding to the given Point3 in game-space.
 	/// </summary>
 	public Pathfinding Pathfind(Point3 pos) {
 		return new Pathfinding(this, data, Point3FromGameToData(new Point3[]{pos}));
@@ -101,7 +101,21 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 GetStartSphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(startPos)[0]);
-		return Vector3FromCubeToSphere(v, length, v, radius);
+		Vector3 floor = v;
+		if (floor.x<1)
+			floor.x=0;
+		else if (floor.x>length)
+			floor.x = length;
+		else if (floor.y<1)
+			floor.y=0;
+		else if (floor.y>length)
+			floor.y = length;
+		else if (floor.y<0)
+			floor.y = 0;
+		else
+			floor.z=0;
+		v = Vector3FromCubeToSphere(v, length, floor, radius);
+		return v;
 	}
 
 	/// <summary>
@@ -116,7 +130,7 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 FindDoorSphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(door)[0]);
-		return Vector3FromCubeToSphere(v, length, v, radius);
+		return Vector3FromCubeToSphere(v, length, v.normalized*radius, radius);
 	}
 
 	/// <summary>
@@ -131,7 +145,7 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 FindKeySphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(key)[0]);
-		return Vector3FromCubeToSphere(v, length, v, radius);
+		return Vector3FromCubeToSphere(v, length, v.normalized*radius, radius);
 	}
 
 	/// <summary>
@@ -176,7 +190,7 @@ public class MazeStructure {
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
 	public static Point3 FromCubeToGame(Vector3 v) {
-		return new Point3(v)+1;
+		return new Point3(v/2)+1;
 	}
 
 	/// <summary>

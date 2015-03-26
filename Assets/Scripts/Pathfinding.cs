@@ -13,6 +13,7 @@ public class Pathfinding {
 	public Pathfinding(MazeStructure maze, bool[,,] walls, Point3 center) {
 		// initialize member variables
 		this.center = center;
+		this.maze = maze;
 		Debug.Log(center);
 		data = new int[walls.GetLength(0), walls.GetLength(1), walls.GetLength(2)];
 		data.Initialize();

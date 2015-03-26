@@ -29,34 +29,22 @@ public class MazeGame:MonoBehaviour {
 	public GameObject left_cam;
 	public GameObject right_cam;
 	public AnimationCurve lightFlicker;
-	public GameObject monster;
-	public Pathfinding temp;
+	public Monster monster;
 	private MazeCell[, ,] cells;
 	private GameObject mazeSphere;
-	public Point3[] points;
 	public Light cLight;
+
+
 
 	// Use this for initialization
 	void Start() {
 		//call for start menu
-		top.Start();
-		bottom.Start();
-		left.Start();
-		right.Start();
-		back.Start();
-		front.Start();
+		MazeTool[] tools = {top, bottom, left, right, back, front};
 
-		/*bottom.displayBorders = false;
-		top.displayBorders = false;
-		back.displayBorders = false;
-
-		top.gameObject.transform.localPosition = new Vector3(0,114.5f,93.6f);
-		top.gameObject.transform.rotation = Quaternion.Euler (180, 0, 0);
-
-		back.gameObject.transform.localPosition = new Vector3(-1.6f,103.5f,-10.1f);
-		back.gameObject.transform.rotation = Quaternion.Euler (90, 0, 0);
-		*/
-
+		for(int i=0; i<tools.Length; i++){
+			tools[i].Start();
+			tools[i].gameObject.SetActive(false);
+		}
 
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 
@@ -75,47 +63,10 @@ public class MazeGame:MonoBehaviour {
 
 		door = mazeStruct.GetDoor();
 
+		// create and initialize player and monster
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
-		player.GetComponent<OVRCameraRig>().Init();
-		monster = (GameObject)Instantiate(monster.gameObject, new Vector3(4.79f,47.36f,-.038f), Quaternion.identity);
-		left_cam = GameObject.Find("LeftEyeAnchor");
-		right_cam = GameObject.Find("RightEyeAnchor");
-		CapsuleCollider collider = player.AddComponent<CapsuleCollider> ();
-		collider.material = (PhysicMaterial)Resources.Load ("WallPhysics", typeof(PhysicMaterial));
-		collider.height = 2;
-		collider.center = new Vector3 (0, .4f, 0);
-		//monster.AddComponent<HUD> ().CameraFacing = left_cam.gameObject.GetComponent<Camera> ();
-
-		left_cam.gameObject.AddComponent<Skybox>().material = 
-			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
-		right_cam.gameObject.AddComponent<Skybox>().material = 
-			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
-		player.AddComponent<Rigidbody>().useGravity = false;
-		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material, radius, mazeStruct);
-		player.GetComponentInChildren<LightFlicker>().enabled = false;
-		player.GetComponentInChildren<Light>().enabled = false;
-
-		//Debug.Log ("t estingalnflkasdflkj");
-		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);
-
-		temp  = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
-		Debug.Log(mazeStruct.FindKeySphere());
-		points = temp.PathToPoint(mazeStruct.FindKey()[0]);
-		//while (temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))) > 0) {
-
-		//}
-
-		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(points[0]));
-
-		//	temp.
-		//monster.GetComponent<Navigate> ().SetDestination (player.transform);
-
+		monster = (Monster)Instantiate(monster, new Vector3(4.79f,47.36f,-.038f), Quaternion.identity);
+		player.AddComponent<Player>().Init(lights, door, key, Resources.Load<Material>("Overcast2 Skybox"), radius, mazeStruct, monster);
+		monster.gameObject.SetActive (false);
 	}
-
-	void Update() {
-		//monster.GetComponent<Navigate> ().SetDestination (this.door.transform);
-		/*
-		Debug.Log ("pt 1: "+points[0] + " pt2: "+temp.GetDistanceToEnd(new Point3(new Vector3(monster.transform.localPosition.x,monster.transform.localPosition.y,monster.transform.localPosition.z))));*/
-	}
-
 }
