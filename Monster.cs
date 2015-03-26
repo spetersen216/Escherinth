@@ -5,16 +5,14 @@ public class Monster : MonoBehaviour {
 	
 	private Pathfinding temp;
 	private Transform player;
-	public Point3[] path;
-	public Vector3[] positions;
+	private Point3[] path;
+	private Vector3[] positions;
 	private MazeStructure mazeStruct;
-	private MazeCell[,,] cells;
-	public float distance=0;
+	private float distance=0;
 
-	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells, Transform player, Vector3 startPos) {
+	public void Init(MazeStructure mazeStruct, Transform player, Vector3 startPos) {
 
 		this.player = player;
-		this.cells = cells;
 		this.mazeStruct = mazeStruct;
 		gameObject.SetActive(true);
 		
@@ -35,12 +33,11 @@ public class Monster : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		// find player position
-		Vector3 v = MazeStructure.Vector3FromSphereToCube(player.position.normalized * mazeStruct.radius, mazeStruct.length*2, mazeStruct.radius);
-		print("V: "+v);
+		Vector3 v = MazeStructure.Vector3FromSphereToCube(player.position.normalized * mazeStruct.radius, mazeStruct.length, mazeStruct.radius);
 		Point3 playerPos = MazeStructure.FromCubeToGame(v);
 
 		// if the current path is invalid
-		if (path==null || path.Length==0 || distance>path.Length /*|| path[path.Length-1]!=playerPos*/) {
+		if (path==null || distance>path.Length /*|| path[path.Length-1]!=playerPos*/) {
 			// find monster position
 			v = MazeStructure.Vector3FromSphereToCube(transform.position.normalized * mazeStruct.radius, mazeStruct.length, mazeStruct.radius);
 			Point3 monsterPos = MazeStructure.FromCubeToGame(v);
@@ -58,9 +55,21 @@ public class Monster : MonoBehaviour {
 				//Point3 p = MazeStructure.Point3FromDataToGame(path[i])[0];
 				Point3 p = path[i];
 				v = MazeStructure.FromGameToCube(p);
-				Vector3 floor = cells[p.x, p.y, p.z].GetFloor(v);
+				Vector3 floor = v;
+				if (floor.x<1)
+					floor.x=0;
+				else if (floor.x>mazeStruct.length)
+					floor.x = mazeStruct.length;
+				else if (floor.y<1)
+					floor.y=0;
+				else if (floor.y>mazeStruct.length)
+					floor.y = mazeStruct.length;
+				else if (floor.y<0)
+					floor.y = 0;
+				else
+					floor.z=0;
 				positions[i] = MazeStructure.Vector3FromCubeToSphere(v, mazeStruct.length, floor, mazeStruct.radius);
-				print (path[i]+" -> "+v+" -> "+v+" -> "+positions[i]);
+				print (path[i]+" -> "+v+" -> "+floor+" -> "+positions[i]);
 			}
 		}
 

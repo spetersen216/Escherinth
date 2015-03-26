@@ -4,14 +4,14 @@ using System;
 
 public class MazeStructure {
 	private MazeTool mazeTool;
-	private bool[,,] data;
+	private bool[, ,] data;
 	private Point3 door;
 	private GameObject doorObj;
 	private Point3 key;
 	public int length;
 	public float radius;
 	private Point3 startPos;
-	
+
 	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, float radius) {
 		// initialize data
 		this.mazeTool = top;
@@ -20,7 +20,7 @@ public class MazeStructure {
 			for (int j=0; j<data.GetLength(1); ++j)
 				for (int k=0; k<data.GetLength(2); ++k)
 					data[i, j, k] = true;
-		
+
 		// verify that MazeTools have the same dimensions
 		this.radius = radius;
 		length = top.walls.GetLength(0);
@@ -30,7 +30,8 @@ public class MazeStructure {
 			right.walls.GetLength(0)!=length || right.walls.GetLength(1)!=length ||
 			front.walls.GetLength(0)!=length || front.walls.GetLength(1)!=length ||
 			back.walls.GetLength(0)!=length || back.walls.GetLength(1)!=length)
-				throw new Exception("MazeTool lengths don't match.");
+			throw new Exception("MazeTool lengths don't match.");
+		length /= 2;
 
 		// parse all the mazeTools
 		int high = data.GetLength(0)-2;
@@ -40,7 +41,7 @@ public class MazeStructure {
 		ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
 		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
 		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
-		
+
 		startPos = new Point3(3, 1, 3);
 		key = new Point3(5, 19, 5);
 		door = new Point3(2, 1, 1);
@@ -81,14 +82,14 @@ public class MazeStructure {
 		Point3 avg = (p1+p2)/2;
 		return !data[avg.x, avg.y, avg.z];
 	}
-	
+
 	/// <summary>
 	/// Returns Pathfinding to the given Point3 in game-space.
 	/// </summary>
 	public Pathfinding Pathfind(Point3 pos) {
-		return new Pathfinding(this, data, Point3FromGameToData(new Point3[]{pos}));
+		return new Pathfinding(this, data, Point3FromGameToData(new Point3[] { pos }));
 	}
-	
+
 	/// <summary>
 	/// Returns the GameObject that corresponds to the door.
 	/// </summary>
@@ -124,7 +125,7 @@ public class MazeStructure {
 	public Point3[] GetStart() {
 		return Point3FromDataToGame(startPos);
 	}
-	
+
 	/// <summary>
 	/// Returns the sphere-space location of the door.
 	/// </summary>
@@ -154,7 +155,7 @@ public class MazeStructure {
 	public Point3[] FindKey() {
 		return Point3FromDataToGame(key);
 	}
-	
+
 	/// <summary>
 	/// Transforms a Point3 from data-space to game-space.
 	/// If the Point3 is representable by a single Point3, it returns the single Point3.
@@ -172,11 +173,11 @@ public class MazeStructure {
 			p.y -= 1;
 		}
 		if (p==p2)
-		return new Point3[]{(p+1)/2};
+			return new Point3[] { (p+1)/2 };
 		else
-		return new Point3[]{(p+1)/2, (p2+1)/2};
+			return new Point3[] { (p+1)/2, (p2+1)/2 };
 	}
-	
+
 	/// <summary>
 	/// Transforms the given Point3(s) from game-space to data-space.
 	/// The argument must have (Length==1 || Length==2).
@@ -206,11 +207,7 @@ public class MazeStructure {
 	/// floor is the cube-coordinate of the floor below v.
 	/// radius is the radius of the sphere.
 	/// </summary>
-	public static Vector3 Vector3FromCubeToSphere(Vector3 v, int length, Vector3 floor, float radius=-1) {
-		// handle radius
-		if (radius<0)
-			radius = length/2;
-
+	public static Vector3 Vector3FromCubeToSphere(Vector3 v, int length, Vector3 floor, float radius) {
 		// translate v, center into a cube around Vector3.zero
 		Vector3 center = Vector3.one*(length/2);
 		v -= center;
@@ -226,10 +223,7 @@ public class MazeStructure {
 	/// length is the number of cells in a row/column of the maze.
 	/// radius is the radius of the sphere.
 	/// </summary>
-	public static Vector3 Vector3FromSphereToCube(Vector3 v, int length, float radius=-1) {
-		// handle radius
-		if (radius<0)
-			radius = length/2;
+	public static Vector3 Vector3FromSphereToCube(Vector3 v, int length, float radius) {
 		// morph into a cube around Vector3.zero
 		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 		Vector3 floor = v*(0.5f*length/max);
@@ -290,21 +284,20 @@ public class MazeStructure {
 	/// <summary>
 	/// Returns a 3D array of MazeCells that create a sphere, with indexes in game-space.
 	/// </summary>
-	public MazeCell[,,] MakeCells(Mesh floor, Mesh[] cellWalls, Mesh[] cellWallTops, Material cellFloorMat,
-		Material cellWallMat, Material cellWallTopMat, AnimationCurve flicker, float radius)
-	{
+	public MazeCell[, ,] MakeCells(Mesh floor, Mesh[] cellWalls, Mesh[] cellWallTops, Material cellFloorMat,
+		Material cellWallMat, Material cellWallTopMat, AnimationCurve flicker, float radius) {
 		GameObject container = new GameObject("Maze-Sphere Container");
-		MazeCell[,,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
-		bool[,,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
+		MazeCell[, ,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
+		bool[, ,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
 		visited.Initialize();
-/*for (int i=0; i<visited.GetLength(0); ++i)
-	for (int j=0; j<visited.GetLength(1); ++j)
-		for (int k=0; k<visited.GetLength(2); ++k)
-			visited[i, j, k] = true;
-		for (int i=0; i<3; ++i)
-			for (int j=0; j<3; ++j)
-				for (int k=0; k<3; ++k)
-					visited[i, j, k] = false;*/
+		/*for (int i=0; i<visited.GetLength(0); ++i)
+			for (int j=0; j<visited.GetLength(1); ++j)
+				for (int k=0; k<visited.GetLength(2); ++k)
+					visited[i, j, k] = true;
+				for (int i=0; i<3; ++i)
+					for (int j=0; j<3; ++j)
+						for (int k=0; k<3; ++k)
+							visited[i, j, k] = false;*/
 		int count=0;
 
 		// iterate over {x, y, z}

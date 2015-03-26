@@ -10,9 +10,11 @@ public class Player:MonoBehaviour {
 	private float radius;
 	private MazeStructure mazeStruct;
 	private Monster monster;
+	private MazeCell[,,] cells;
 
-	public void Init(LightSystem lights, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster) {
+	public void Init(LightSystem lights, MazeCell[,,] cells, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster) {
 		this.lights = lights;
+		this.cells = cells;
 		this.door = door;
 		this.key = key;
 		this.radius = radius;
@@ -97,7 +99,7 @@ public class Player:MonoBehaviour {
 			gameObject.GetComponentInChildren<Light>().enabled = true;
 			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
 
-			monster.Init(mazeStruct, transform, mazeStruct.GetStartSphere ());
+			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 			sphere.transform.localScale = new Vector3(90, 90, 90);

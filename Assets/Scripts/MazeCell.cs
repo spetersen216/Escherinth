@@ -7,8 +7,7 @@ public class MazeCell:MonoBehaviour {
 	private GameObject wall;
 	private GameObject wallTop;
 	private GameObject[] children;
-	private Light lightbulb;
-	public LightFlicker flicker;
+	public Plane plane;
 
 	/// <summary>
 	/// Initializes the MazeCell. pos is in data-space.
@@ -18,34 +17,41 @@ public class MazeCell:MonoBehaviour {
 
 		// create cell floor
 		floor = new GameObject("floor - "+cellFloor.name);
-		floor.AddComponent<MeshFilter>().mesh = Morph(cellFloor, vectors, false);
+		floor.AddComponent<MeshFilter>().mesh = Morph(cellFloor, mazeStruct, vectors, false);
 		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellFloorMat);
 		floor.transform.parent = transform;
 
 		// create cell wall
 		wall = new GameObject("cell wall - "+cellWall.name);
-		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall, vectors, true);
+		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall, mazeStruct, vectors, true);
 		wall.AddComponent<MeshCollider>().sharedMesh = wall.GetComponent<MeshFilter>().mesh;
 		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallMat);
 		wall.transform.parent = transform;
 
 		// create cell wall top
 		wallTop = new GameObject("cell wall top - "+cellWallTop.name);
-		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop, vectors, true);
+		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop, mazeStruct, vectors, true);
 		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTopMat);
 		wallTop.transform.parent = transform;
+
+		plane = new Plane(vectors.vy, vectors.v00);
 
 		GameObject empty = new GameObject("Empty");
 		empty.transform.parent = transform;
 		Point3 temp = MazeStructure.Point3FromDataToGame(pos)[0];
 		Vector3 temp2 = MazeStructure.FromGameToCube(temp);
-		temp2 = MazeStructure.Vector3FromCubeToSphere(temp2, mazeStruct.length, temp2, mazeStruct.radius);
+		Vector3 temp3 = temp2 - plane.normal*plane.GetDistanceToPoint(temp2);
+		temp2 = MazeStructure.Vector3FromCubeToSphere(temp2, mazeStruct.length, temp3, mazeStruct.radius);
 		empty.transform.position = temp2;
 
 		children = new GameObject[]{floor, wall, wallTop};
 	}
 
-	private Mesh Morph(Mesh m, VectorSpaceish vectors, bool invertTris) {
+	public Vector3 GetFloor(Vector3 v) {
+		return v - plane.normal*plane.GetDistanceToPoint(v);
+	}
+
+	private Mesh Morph(Mesh m, MazeStructure mazeStruct, VectorSpaceish vectors, bool invertTris) {
 		Mesh result = new Mesh();
 
 		// create new vertices, the Vector Space given by x,y,z, with base at a
@@ -56,7 +62,7 @@ public class MazeCell:MonoBehaviour {
 				throw new Exception("Mesh vertices out of range for MazeCell (mesh is "+m.name+", vertex is at ("+verts[i].x+", "+verts[i].y+", "+verts[i].z+"))");
 			Vector3 floor = vectors.Translate(verts[i], false);
 			verts[i] = vectors.Translate(verts[i], true);
-			verts[i] = MazeStructure.Vector3FromCubeToSphere(verts[i], 10, floor, 50);
+			verts[i] = MazeStructure.Vector3FromCubeToSphere(verts[i], mazeStruct.length, floor, mazeStruct.radius);
 		}
 		result.vertices = verts;
 

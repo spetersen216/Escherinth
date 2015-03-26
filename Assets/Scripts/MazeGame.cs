@@ -39,9 +39,9 @@ public class MazeGame:MonoBehaviour {
 	// Use this for initialization
 	void Start() {
 		//call for start menu
-		MazeTool[] tools = {top, bottom, left, right, back, front};
+		MazeTool[] tools = { top, bottom, left, right, back, front };
 
-		for(int i=0; i<tools.Length; i++){
+		for (int i=0; i<tools.Length; i++) {
 			tools[i].Start();
 			tools[i].gameObject.SetActive(false);
 		}
@@ -49,13 +49,12 @@ public class MazeGame:MonoBehaviour {
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 
 		Vector3 position = mazeStruct.FindKeySphere().normalized*(radius-5);
-		position = new Vector3(-5.22f, 47.14f, 0);
-		position = new Vector3(-21.12f, 38.91f, -20.73f);
-		Debug.Log (position);
+		position = new Vector3(-11.96039f, 44f, -12.60795f);
+		Debug.Log(position);
 		key = ((GameObject)Instantiate(key.gameObject, position, Quaternion.identity)).GetComponent<Key>();
 		key.transform.rotation = Quaternion.Euler(270, 0, 0);
 		//key.transform.localPosition += new Vector3(0, 1.5f, 0);
-		cLight = ((GameObject)Instantiate (cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
+		cLight = ((GameObject)Instantiate(cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
@@ -65,8 +64,8 @@ public class MazeGame:MonoBehaviour {
 
 		// create and initialize player and monster
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
-		monster = (Monster)Instantiate(monster, new Vector3(4.79f,47.36f,-.038f), Quaternion.identity);
-		player.AddComponent<Player>().Init(lights, door, key, Resources.Load<Material>("Overcast2 Skybox"), radius, mazeStruct, monster);
-		monster.gameObject.SetActive (false);
+		monster = (Monster)Instantiate(monster, new Vector3(4.79f, 47.36f, -.038f), Quaternion.identity);
+		player.AddComponent<Player>().Init(lights, cells, door, key, Resources.Load<Material>("Overcast2 Skybox"), radius, mazeStruct, monster);
+		monster.gameObject.SetActive(false);
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -10,7 +10,7 @@ public class MazeToolComponent:MonoBehaviour {
 	public virtual void Update() {
 		if (selectMazeTool) {
 			selectMazeTool = false;
-			Selection.activeGameObject = transform.parent.parent.gameObject;
+			//Selection.activeGameObject = transform.parent.parent.gameObject;
 		}
 	}
 }

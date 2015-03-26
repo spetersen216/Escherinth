@@ -32,7 +32,7 @@ public class LightSystem:MonoBehaviour {
 				for (int j=1; j<cells.GetLength(1); ++j) {
 					for (int k =1; k<cells.GetLength(2); k++) {
 						if (cells[i, j, k] != null) {
-							byte value = (byte)Mathf.Max(Mathf.Min(GetLightAtPoint(i, j, k), 255), 0);
+							byte value = (byte)Mathf.Max(Mathf.Min(GetLightAtPoint(i, j, k), 255), 96);
 							cells[i, j, k].SetBrightness(new Color32(value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
 						}
 					}
