@@ -67,7 +67,7 @@ public class OVRCameraRig : MonoBehaviour
 		needsCameraConfigure = true;
 	}
 
-	private void Start()
+	public void Init()
 	{
 		EnsureGameObjectIntegrity();
 

@@ -76,6 +76,7 @@ public class MazeGame:MonoBehaviour {
 		door = mazeStruct.GetDoor();
 
 		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
+		player.GetComponent<OVRCameraRig>().Init();
 		monster = (GameObject)Instantiate(monster.gameObject, new Vector3(4.79f,47.36f,-.038f), Quaternion.identity);
 		left_cam = GameObject.Find("LeftEyeAnchor");
 		right_cam = GameObject.Find("RightEyeAnchor");
@@ -89,11 +90,10 @@ public class MazeGame:MonoBehaviour {
 			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
 		right_cam.gameObject.AddComponent<Skybox>().material = 
 			(Material)Resources.Load("Overcast2 Skybox", typeof(Material));
+		player.AddComponent<Rigidbody>().useGravity = false;
 		player.AddComponent<RunTime>().Init(lights, door, key, left_cam.GetComponent<Skybox>().material, radius, mazeStruct);
 		player.GetComponentInChildren<LightFlicker>().enabled = false;
 		player.GetComponentInChildren<Light>().enabled = false;
-		var rBody = player.AddComponent<Rigidbody> ();
-		rBody.useGravity = false;
 
 		//Debug.Log ("t estingalnflkasdflkj");
 		//monster.GetComponent<Rigidbody> ().AddRelativeForce (monster.transform.forward * 2);

@@ -6,6 +6,7 @@ public class MazeStructure {
 	private MazeTool mazeTool;
 	private bool[,,] data;
 	private Point3 door;
+	private GameObject doorObj;
 	private Point3 key;
 	public int length;
 	public float radius;
@@ -43,6 +44,7 @@ public class MazeStructure {
 		startPos = new Point3(3, 1, 3);
 		key = new Point3(5, 19, 5);
 		door = new Point3(2, 1, 1);
+		doorObj = top.walls[11, 8].gameObject;
 		Debug.Log("key is at "+key);
 	}
 
@@ -91,7 +93,7 @@ public class MazeStructure {
 	/// Returns the GameObject that corresponds to the door.
 	/// </summary>
 	public GameObject GetDoor() {
-		return mazeTool.walls[door.x-1, door.y-1].gameObject;
+		return doorObj;
 	}
 
 	/// <summary>
@@ -174,14 +176,14 @@ public class MazeStructure {
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
 	public static Point3 FromCubeToGame(Vector3 v) {
-		return new Point3(v);
+		return new Point3(v)+1;
 	}
 
 	/// <summary>
 	/// Takes a Point3 in game-space and returns the corresponding Vector3 in cube-space.
 	/// </summary>
 	public static Vector3 FromGameToCube(Point3 p) {
-		return (p+p+1).ToVector3()/2;
+		return (p+p-1).ToVector3()/2;
 	}
 
 	/// <summary>
@@ -403,7 +405,7 @@ public class MazeStructure {
 						MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();
 						cell.transform.parent = parent.transform;
 						//Debug.Log("cellWallIndex: "+cellWallIndex);
-						cell.Init(p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
+						cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
 							cellWallTopMat, flicker, v);
 						result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = cell;
 					}

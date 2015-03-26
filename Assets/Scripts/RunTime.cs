@@ -27,14 +27,24 @@ public class RunTime:MonoBehaviour {
 	}
 
 	void Update() {
-		// handle camera angle (from mouse movement)
-		transform.Rotate(transform.up, -Input.GetAxis("Mouse X")*10);
-		transform.Rotate(transform.right, Input.GetAxis("Mouse Y")*10);
+		// calculate up, forwards and right
+		Vector3 up = -transform.position.normalized;
+		Vector3 forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
+		if (Vector3.Angle(up, forwards)<90)
+			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+		Vector3 rights = Vector3.Cross(forwards, up).normalized;
 
-		// calculate forwards
-		Vector3 forwards = Vector3.RotateTowards(-transform.position, transform.forward, Mathf.PI/2, 1).normalized;
-		if (Vector3.Angle(-transform.position, forwards)<90)
-			forwards = Vector3.RotateTowards(transform.position, transform.forward, Mathf.PI/2, 1).normalized;
+		// handle camera angle (from mouse movement)
+		if (Input.GetAxis("Mouse X")>0)
+			forwards = Vector3.RotateTowards(forwards, -rights, Input.GetAxis("Mouse X")/4, 1);
+		else
+			forwards = Vector3.RotateTowards(forwards, rights, -Input.GetAxis("Mouse X")/4, 1);
+		rights = Vector3.Cross(forwards, up).normalized;
+		//transform.rotation.SetFromToRotation(-transform.position, forwards);
+
+		//Quaternion.RotateTowards(Quaternion.Euler(Vector3.zero),
+		//transform.Rotate(-transform.position, -Input.GetAxis("Mouse X")*10);
+		//transform.Rotate(transform.right.normalized, Input.GetAxis("Mouse Y")*10);
 
 		// sum the WASD/Arrows movement
 		float forward = 0, right = 0;
@@ -49,12 +59,12 @@ public class RunTime:MonoBehaviour {
 
 		// calculate where to move, then move
 		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
-		//transform.position = mazeStruct.Move(transform.position, dest).normalized * (radius-5);
+		
 		rigidbody.MovePosition(dest.normalized * (radius - 5));
 		//rigidbody.MovePosition(rigidbody.position+rigidbody.velocity*2);
 		//rigidbody.velocity = Vector3.zero;
 		rigidbody.velocity/= 2;
-
+		rigidbody.
 		// aim the rotation forwards
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
 	}

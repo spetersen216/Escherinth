@@ -11,9 +11,9 @@ public class MazeCell:MonoBehaviour {
 	public LightFlicker flicker;
 
 	/// <summary>
-	/// Initializes the MazeCell.
+	/// Initializes the MazeCell. pos is in data-space.
 	/// </summary>
-	public void Init(Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
+	public void Init(MazeStructure mazeStruct, Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
 		Material cellWallTopMat, AnimationCurve curve, VectorSpaceish vectors) {
 
 		// create cell floor
@@ -35,21 +35,12 @@ public class MazeCell:MonoBehaviour {
 		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTopMat);
 		wallTop.transform.parent = transform;
 
-		// initialize lightbulb
-		/*lightbulb = new GameObject("light").AddComponent<Light>();
-		lightbulb.transform.position = MazeStructure.Vector3FromCubeToSphere(a+0.5f*(x+z)+2*y, 10, a+0.5f*(x+z), 10);
-		lightbulb.type = LightType.Point;
-		lightbulb.range = 12;
-		lightbulb.intensity = 0.4f;
-		lightbulb.renderMode = LightRenderMode.ForcePixel;
-		lightbulb.transform.parent = transform;
-
-		// add LightFlicker
-		flicker = lightbulb.gameObject.AddComponent<LightFlicker>();
-		flicker.brightness = curve;
-		flicker.low_intensity = 0.3f;
-		flicker.high_intensity = 0.89f;
-		flicker.randomness = 0.05f;*/
+		GameObject empty = new GameObject("Empty");
+		empty.transform.parent = transform;
+		Point3 temp = MazeStructure.Point3FromDataToGame(pos)[0];
+		Vector3 temp2 = MazeStructure.FromGameToCube(temp);
+		temp2 = MazeStructure.Vector3FromCubeToSphere(temp2, mazeStruct.length, temp2, mazeStruct.radius);
+		empty.transform.position = temp2;
 
 		children = new GameObject[]{floor, wall, wallTop};
 	}
