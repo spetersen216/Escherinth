@@ -12,7 +12,7 @@ public class Player:MonoBehaviour {
 	private Monster monster;
 	private MazeCell[,,] cells;
 
-	public void Init(LightSystem lights, MazeCell[,,] cells, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster) {
+	public void Init(LightSystem lights, MazeCell[,,] cells, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster, AudioSource lightsOutInit) {
 		this.lights = lights;
 		this.cells = cells;
 		this.door = door;
@@ -73,7 +73,7 @@ public class Player:MonoBehaviour {
 		// calculate where to move, then move
 		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
 		
-		rigidbody.MovePosition(dest.normalized * (radius - 5));
+		rigidbody.MovePosition(dest.normalized * (radius - 3.5f));
 		//rigidbody.MovePosition(rigidbody.position+rigidbody.velocity*2);
 		//rigidbody.velocity = Vector3.zero;
 		rigidbody.velocity/= 2;

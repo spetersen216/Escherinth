@@ -13,7 +13,7 @@ public class LightSystem:MonoBehaviour {
 	public String test;
 
 
-	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells) {
+	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells, AudioSource lightOff) {
 		this.cells = cells;
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
