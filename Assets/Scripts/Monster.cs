@@ -36,7 +36,7 @@ public class Monster : MonoBehaviour {
 	void Update () {
 		// find player position
 		Vector3 v = MazeStructure.Vector3FromSphereToCube(player.position.normalized * mazeStruct.radius, mazeStruct.length*2, mazeStruct.radius);
-		print("V: "+v);
+		//print("V: "+v);
 		Point3 playerPos = MazeStructure.FromCubeToGame(v);
 
 		// if the current path is invalid
@@ -46,9 +46,9 @@ public class Monster : MonoBehaviour {
 			Point3 monsterPos = MazeStructure.FromCubeToGame(v);
 
 			// path find around the monster, find path to player
-			print ("monster pos: "+monsterPos);
+			//print ("monster pos: "+monsterPos);
 			temp = mazeStruct.Pathfind(monsterPos);
-			print ("player pos: "+playerPos);
+			//print ("player pos: "+playerPos);
 			path = temp.PathToPoint(playerPos);
 
 			// fill in positions
@@ -60,7 +60,7 @@ public class Monster : MonoBehaviour {
 				v = MazeStructure.FromGameToCube(p);
 				Vector3 floor = cells[p.x, p.y, p.z].GetFloor(v);
 				positions[i] = MazeStructure.Vector3FromCubeToSphere(v, mazeStruct.length, floor, mazeStruct.radius);
-				print (path[i]+" -> "+v+" -> "+v+" -> "+positions[i]);
+				//print (path[i]+" -> "+v+" -> "+v+" -> "+positions[i]);
 			}
 		}
 

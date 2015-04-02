@@ -11,8 +11,10 @@ public class Player:MonoBehaviour {
 	private MazeStructure mazeStruct;
 	private Monster monster;
 	private MazeCell[,,] cells;
+	private Lamp lamp;
+	private GameObject lantern;
 
-	public void Init(LightSystem lights, MazeCell[,,] cells, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster, AudioSource lightsOutInit) {
+	public void Init(LightSystem lights, MazeCell[,,] cells, GameObject door, Key key, Material mat, float radius, MazeStructure mazeStruct, Monster monster, AudioSource lightsOutInit, Lamp lamp, GameObject lantern) {
 		this.lights = lights;
 		this.cells = cells;
 		this.door = door;
@@ -20,7 +22,8 @@ public class Player:MonoBehaviour {
 		this.radius = radius;
 		this.monster = monster;
 		this.mazeStruct = mazeStruct;
-
+		this.lamp = lamp;
+		this.lantern = lantern;
 		// initialize this
 		//transform.position = MazeStructure.Vector3FromCubeToSphere(mazeStruct.GetStart()[0].ToVector3(), 
 		//mazeStruct.length, mazeStruct.GetStart()[0].ToVector3(), radius);
@@ -31,8 +34,8 @@ public class Player:MonoBehaviour {
 		// initialize other components
 		GetComponent<OVRCameraRig>().Init();
 		gameObject.AddComponent<Rigidbody>().useGravity = false;
-		GetComponentInChildren<LightFlicker>().enabled = false;
-		GetComponentInChildren<Light>().enabled = false;
+		//GetComponentInChildren<LightFlicker>().enabled = false;
+		//GetComponentInChildren<Light>().enabled = false;
 		CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider> ();
 		collider.material = (PhysicMaterial)Resources.Load ("WallPhysics", typeof(PhysicMaterial));
 		collider.height = 2;
@@ -70,6 +73,7 @@ public class Player:MonoBehaviour {
 		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 			right -= 0.4f;
 
+
 		// calculate where to move, then move
 		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
 		
@@ -88,7 +92,7 @@ public class Player:MonoBehaviour {
 		Debug.Log (collider.name);
 
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
-		if (collider.GetComponent<Key>() == key) {
+		if (collider.GetComponent<Key>() == key){
 			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.1f;
 			door.SetActive(false);
 			collider.gameObject.SetActive(false);
@@ -96,15 +100,20 @@ public class Player:MonoBehaviour {
 			print(skyboxMaterial.GetColor("_Tint"));
 			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
 			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
-			gameObject.GetComponentInChildren<Light>().enabled = true;
-			gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
-
+			//gameObject.GetComponentInChildren<Light>().enabled = true;
+			//gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
+			this.lamp.gameObject.SetActive(true);
 			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			sphere.transform.localScale = new Vector3(90, 90, 90);
+			sphere.transform.localScale = new Vector3(95, 95, 95);
 			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
 			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
 		}
+		if(collider.GetComponent<Lamp>() == lamp){
+			collider.gameObject.SetActive(false);
+			this.lantern.SetActive(true);
+		}
+
 	}
 }
