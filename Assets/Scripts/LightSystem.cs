@@ -18,10 +18,6 @@ public class LightSystem:MonoBehaviour {
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 	}
 
-	void Awake(){
-		this.test = "stay";
-	}
-
 
 	void Update() {
 		keyTime -= Time.deltaTime;
@@ -38,13 +34,11 @@ public class LightSystem:MonoBehaviour {
 					}
 				}
 			}
-			
-			//cells [1, 0, 1].SetBrightness (Color.white);
 		}
 	}
 
 	/// <summary>
-	/// Returns the appropriate brightness for the light at (i, j)
+	/// Returns the appropriate brightness for the light at (i, j, k)
 	/// </summary>
 	private float GetLightAtPoint(int i, int j, int k) {
 		float result = path.GetDistanceToEnd(new Point3(i, j, k))*1.2f+keyTime;

@@ -35,15 +35,15 @@ public class Monster : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		// find player position
-		Vector3 v = MazeStructure.Vector3FromSphereToCube(player.position.normalized * mazeStruct.radius, mazeStruct.length*2, mazeStruct.radius);
+		Vector3 v = mazeStruct.Vector3FromSphereToCube(player.position.normalized*mazeStruct.radius);
 		print("V: "+v);
-		Point3 playerPos = MazeStructure.FromCubeToGame(v);
+		Point3 playerPos = mazeStruct.FromCubeToGame(v);
 
 		// if the current path is invalid
 		if (path==null || path.Length==0 || distance>path.Length /*|| path[path.Length-1]!=playerPos*/) {
 			// find monster position
-			v = MazeStructure.Vector3FromSphereToCube(transform.position.normalized * mazeStruct.radius, mazeStruct.length, mazeStruct.radius);
-			Point3 monsterPos = MazeStructure.FromCubeToGame(v);
+			v = mazeStruct.Vector3FromSphereToCube(transform.position.normalized*mazeStruct.radius);
+			Point3 monsterPos = mazeStruct.FromCubeToGame(v);
 
 			// path find around the monster, find path to player
 			print ("monster pos: "+monsterPos);
@@ -55,11 +55,10 @@ public class Monster : MonoBehaviour {
 			distance = 0;
 			positions = new Vector3[path.Length];
 			for (int i=0; i<positions.Length; ++i) {
-				//Point3 p = MazeStructure.Point3FromDataToGame(path[i])[0];
 				Point3 p = path[i];
-				v = MazeStructure.FromGameToCube(p);
+				v = mazeStruct.FromGameToCube(p);
 				Vector3 floor = cells[p.x, p.y, p.z].GetFloor(v);
-				positions[i] = MazeStructure.Vector3FromCubeToSphere(v, mazeStruct.length, floor, mazeStruct.radius);
+				positions[i] = mazeStruct.Vector3FromCubeToSphere(v);
 				print (path[i]+" -> "+v+" -> "+v+" -> "+positions[i]);
 			}
 		}

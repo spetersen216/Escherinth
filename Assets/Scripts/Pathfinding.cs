@@ -48,7 +48,7 @@ public class Pathfinding {
 	/// </summary>
 	public Point3[] PathToPoint(Point3 target) {
 		Debug.Log("PathToPoint("+center+", "+target+")");
-		target = MazeStructure.Point3FromGameToData(new Point3[] { target });
+		target = maze.Point3FromGameToData(new Point3[] { target });
 		Point3[] result = new Point3[data[target.x, target.y, target.z]+1];
 		int index = result.Length;
 
@@ -58,7 +58,7 @@ public class Pathfinding {
 			Point3[] neighbors = target.neighbors(2);
 			foreach (Point3 newPos in neighbors) {
 				if (maze.ValidMove(target, newPos) && data[newPos.x, newPos.y, newPos.z]<data[target.x, target.y, target.z]) {
-					result[--index] = MazeStructure.Point3FromDataToGame(target)[0];
+					result[--index] = maze.Point3FromDataToGame(target)[0];
 					target = newPos;
 					break;
 				}
@@ -69,13 +69,13 @@ public class Pathfinding {
 				return null;
 			}
 		}
-		result[--index] = MazeStructure.Point3FromDataToGame(target)[0];
+		result[--index] = maze.Point3FromDataToGame(target)[0];
 		Debug.Log("Index: "+index);
 		return result;
 	}
 
 	public int GetDistanceToEnd(Point3 pos) {
-		pos = MazeStructure.Point3FromGameToData(new Point3[] { pos });
+		pos = maze.Point3FromGameToData(new Point3[] {pos});
 		return data[pos.x, pos.y, pos.z];
 	}
 

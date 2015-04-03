@@ -6,7 +6,7 @@ using System;
 public class MazeToolWall:MazeToolComponent {
 	
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	public enum WallType {normal, door};
+	public enum WallType {normal, door, sliding};
 	public WallType type;
 	private WallType last;
 
@@ -42,5 +42,16 @@ public class MazeToolWall:MazeToolComponent {
 		}
 	}
 
-	
+	void OnDrawGizmos() {
+		switch(type) {
+		case WallType.door:
+			Gizmos.DrawIcon(transform.position, "door.png", scaleGizmoIcon);
+			break;
+		case WallType.sliding:
+			Gizmos.DrawIcon(transform.position, "sliding.png", scaleGizmoIcon);
+			break;
+		default:
+			break;
+		}
+	}
 }

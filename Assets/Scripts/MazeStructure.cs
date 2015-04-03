@@ -1,16 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System;
 
 public class MazeStructure {
 	private MazeTool mazeTool;
-	private bool[, ,] data;
-	private Point3 door;
-	private GameObject doorObj;
-	private Point3 key;
+	private bool[,,] data;
+	private MazeCell[,,] cells;
 	public int length;
 	public float radius;
+
+	private Point3 key;
+	private Point3 door;
 	private Point3 startPos;
+	private Point3 monsterPos;
+	private HashSet<Point3> sliding=new HashSet<Point3>();
+	private GameObject doorObj;
 
 	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, float radius) {
 		// initialize data
@@ -42,11 +47,12 @@ public class MazeStructure {
 		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
 		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
 
-		startPos = new Point3(3, 1, 3);
+		/*startPos = new Point3(3, 1, 3);
 		key = new Point3(5, 19, 5);
 		door = new Point3(2, 1, 1);
 		doorObj = top.walls[11, 8].gameObject;
-		Debug.Log("key is at "+key);
+		Debug.Log("key is at "+key);*/
+		Debug.Log("key: "+key+"; start: "+startPos+"; monster: "+monsterPos+"; door: "+door);
 	}
 
 	/// <summary>
@@ -61,6 +67,14 @@ public class MazeStructure {
 				MazeToolWall wall = maze.walls[i, j];
 				if (wall!=null) {
 					data[pos.x, pos.y, pos.z] = wall.gameObject.activeSelf;
+					switch(wall.type) {
+					case MazeToolWall.WallType.door:
+						door = pos;
+						break;
+					case MazeToolWall.WallType.sliding:
+						sliding.Add(pos);
+						break;
+					}
 					if (wall.type==MazeToolWall.WallType.door)
 						door = pos;
 				}
@@ -68,8 +82,17 @@ public class MazeStructure {
 				// parse cells
 				MazeToolCell cell = maze.cells[i, j];
 				if (cell!=null) {
-					if (cell.type==MazeToolCell.CellType.key)
+					switch(cell.type) {
+					case MazeToolCell.CellType.startPos:
+						startPos = pos;
+						break;
+					case MazeToolCell.CellType.monsterPos:
+						monsterPos = pos;
+						break;
+					case MazeToolCell.CellType.key:
 						key = pos;
+						break;
+					}
 				}
 			}
 		}
@@ -93,8 +116,8 @@ public class MazeStructure {
 	/// <summary>
 	/// Returns the GameObject that corresponds to the door.
 	/// </summary>
-	public GameObject GetDoor() {
-		return doorObj;
+	public void RemoveDoor() {
+		throw new Exception("Not implemented");
 	}
 
 	/// <summary>
@@ -102,21 +125,7 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 GetStartSphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(startPos)[0]);
-		Vector3 floor = v;
-		if (floor.x<1)
-			floor.x=0;
-		else if (floor.x>length)
-			floor.x = length;
-		else if (floor.y<1)
-			floor.y=0;
-		else if (floor.y>length)
-			floor.y = length;
-		else if (floor.y<0)
-			floor.y = 0;
-		else
-			floor.z=0;
-		v = Vector3FromCubeToSphere(v, length, floor, radius);
-		return v;
+		return Vector3FromCubeToSphere(v);
 	}
 
 	/// <summary>
@@ -131,7 +140,7 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 FindDoorSphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(door)[0]);
-		return Vector3FromCubeToSphere(v, length, v.normalized*radius, radius);
+		return Vector3FromCubeToSphere(v);
 	}
 
 	/// <summary>
@@ -146,7 +155,7 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 FindKeySphere() {
 		Vector3 v = FromGameToCube(Point3FromDataToGame(key)[0]);
-		return Vector3FromCubeToSphere(v, length, v.normalized*radius, radius);
+		return Vector3FromCubeToSphere(v);
 	}
 
 	/// <summary>
@@ -162,7 +171,7 @@ public class MazeStructure {
 	/// If the Point3 is must be represented by 2 Point3's, it returns an array of 2 Point3's.
 	/// This constraint must always be true: (p+1)==output[0]+output[output.Length-1].
 	/// </summary>
-	public static Point3[] Point3FromDataToGame(Point3 p) {
+	public Point3[] Point3FromDataToGame(Point3 p) {
 		Point3 p2 = p;
 		if (p.x%2==0) {
 			p2.x += 1;
@@ -183,21 +192,22 @@ public class MazeStructure {
 	/// The argument must have (Length==1 || Length==2).
 	/// This constraint must always be true: (output+1)==p[0]+p[p.Length-1].
 	/// </summary>
-	public static Point3 Point3FromGameToData(Point3[] p) {
+	public Point3 Point3FromGameToData(Point3[] p) {
 		return ((p[0]+p[p.Length-1])-1);
 	}
 
 	/// <summary>
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
-	public static Point3 FromCubeToGame(Vector3 v) {
+	public Point3 FromCubeToGame(Vector3 v) {
 		return new Point3(v/2)+1;
+		// p = new Point3(2*v-1)/2
 	}
 
 	/// <summary>
 	/// Takes a Point3 in game-space and returns the corresponding Vector3 in cube-space.
 	/// </summary>
-	public static Vector3 FromGameToCube(Point3 p) {
+	public Vector3 FromGameToCube(Point3 p) {
 		return (p+p-1).ToVector3()/2;
 	}
 
@@ -207,7 +217,20 @@ public class MazeStructure {
 	/// floor is the cube-coordinate of the floor below v.
 	/// radius is the radius of the sphere.
 	/// </summary>
-	public static Vector3 Vector3FromCubeToSphere(Vector3 v, int length, Vector3 floor, float radius) {
+	public Vector3 Vector3FromCubeToSphere(Vector3 v) {
+		Point3 p = FromCubeToGame(v);
+		Debug.Log("p: "+p);
+		Vector3 floor = cells[p.x, p.y, p.z].GetFloor(v);
+		return Vector3FromCubeToSphere(v, floor);
+	}
+
+	/// <summary>
+	/// Takes a Vector3 in cube-space and translates it into a Vector3 in sphere-space.
+	/// length is the number of cells in a row/column of the maze.
+	/// floor is the cube-coordinate of the floor below v.
+	/// radius is the radius of the sphere.
+	/// </summary>
+	public Vector3 Vector3FromCubeToSphere(Vector3 v, Vector3 floor) {
 		// translate v, center into a cube around Vector3.zero
 		Vector3 center = Vector3.one*(length/2);
 		v -= center;
@@ -223,7 +246,7 @@ public class MazeStructure {
 	/// length is the number of cells in a row/column of the maze.
 	/// radius is the radius of the sphere.
 	/// </summary>
-	public static Vector3 Vector3FromSphereToCube(Vector3 v, int length, float radius) {
+	public Vector3 Vector3FromSphereToCube(Vector3 v) {
 		// morph into a cube around Vector3.zero
 		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 		Vector3 floor = v*(0.5f*length/max);
@@ -355,7 +378,7 @@ public class MazeStructure {
 						cellWallIndex += ValidMove(p, p-forward)?0:1;
 
 						// if the cell is on an edge, modify the vector space and cellWallIndex
-						if ((i==1||i==data.GetLength((yIndex+1)%3)-2) || (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+						if (IsEdge(p)) {
 							// modify the vector space and cellWallIndex
 							if (i==1) {
 								v.AddX0(yDiff, yIndex);
@@ -384,7 +407,7 @@ public class MazeStructure {
 						}
 
 						// if the cell is on a corner, corner vector space
-						if ((i==1||i==data.GetLength((yIndex+1)%3)-2) && (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+						if (IsCorner(p)) {
 							// modify the vector space
 							if (i==1 && j==1) {
 								v.v10[yIndex] += yDiff;
@@ -419,6 +442,25 @@ public class MazeStructure {
 				}
 			}
 		}
+		this.cells = result;
 		return result;
+	}
+
+	/*private int GetCellWallIndex(Point3 pos) {
+
+	}*/
+
+	private bool IsEdge(Point3 pos) {
+		int count=0;
+		for (int i=0; i<3; ++i)
+			count += (pos[i]<2 || pos[i]>data.GetLength(i)-3)?1:0;
+		return count==2;
+	}
+
+	private bool IsCorner(Point3 pos) {
+		int count=0;
+		for (int i=0; i<3; ++i)
+			count += (pos[i]<2 || pos[i]>data.GetLength(i)-3)?1:0;
+		return count==3;
 	}
 }

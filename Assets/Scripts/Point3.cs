@@ -138,7 +138,7 @@ public struct Point3 {
 	}
 
 	public override int GetHashCode() {
-		return x+y+z;
+		return x.GetHashCode()+y.GetHashCode()+z.GetHashCode();
 	}
 
 	/// <summary>

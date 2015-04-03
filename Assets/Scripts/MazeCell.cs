@@ -35,15 +35,6 @@ public class MazeCell:MonoBehaviour {
 		wallTop.transform.parent = transform;
 
 		plane = new Plane(vectors.vy, vectors.v00);
-
-		GameObject empty = new GameObject("Empty");
-		empty.transform.parent = transform;
-		Point3 temp = MazeStructure.Point3FromDataToGame(pos)[0];
-		Vector3 temp2 = MazeStructure.FromGameToCube(temp);
-		Vector3 temp3 = temp2 - plane.normal*plane.GetDistanceToPoint(temp2);
-		temp2 = MazeStructure.Vector3FromCubeToSphere(temp2, mazeStruct.length, temp3, mazeStruct.radius);
-		empty.transform.position = temp2;
-
 		children = new GameObject[]{floor, wall, wallTop};
 	}
 
@@ -62,7 +53,7 @@ public class MazeCell:MonoBehaviour {
 				throw new Exception("Mesh vertices out of range for MazeCell (mesh is "+m.name+", vertex is at ("+verts[i].x+", "+verts[i].y+", "+verts[i].z+"))");
 			Vector3 floor = vectors.Translate(verts[i], false);
 			verts[i] = vectors.Translate(verts[i], true);
-			verts[i] = MazeStructure.Vector3FromCubeToSphere(verts[i], mazeStruct.length, floor, mazeStruct.radius);
+			verts[i] = mazeStruct.Vector3FromCubeToSphere(verts[i], floor);
 		}
 		result.vertices = verts;
 

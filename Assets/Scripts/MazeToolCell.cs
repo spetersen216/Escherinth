@@ -6,9 +6,9 @@ using System;
 public class MazeToolCell:MazeToolComponent {
 
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	public enum CellType {normal, key};
-	public CellType type=CellType.normal;
-	private CellType last=CellType.normal;
+	public enum CellType {normal, key, startPos, monsterPos};
+	public CellType type;
+	private CellType last;
 
 	public override void Update() {
 		base.Update();
@@ -42,7 +42,19 @@ public class MazeToolCell:MazeToolComponent {
 		}
 	}
 
-	/*void OnInspectorGUI() {
-		EditorGUILayout.Popup(
-	}*/
+	void OnDrawGizmos() {
+		switch (type) {
+		case CellType.key:
+			Gizmos.DrawIcon(transform.position, "key.png", scaleGizmoIcon);
+			break;
+		case CellType.startPos:
+			Gizmos.DrawIcon(transform.position, "startPos.png", scaleGizmoIcon);
+			break;
+		case CellType.monsterPos:
+			Gizmos.DrawIcon(transform.position, "monsterPos.png", scaleGizmoIcon);
+			break;
+		default:
+			break;
+		}
+	}
 }

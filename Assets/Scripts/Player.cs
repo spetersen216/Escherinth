@@ -71,12 +71,12 @@ public class Player:MonoBehaviour {
 			right -= 0.4f;
 
 		// calculate where to move, then move
-		Vector3 dest = transform.position + forward*forwards + right*transform.right.normalized;
+		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized;
 		
 		rigidbody.MovePosition(dest.normalized * (radius - 3.5f));
 		//rigidbody.MovePosition(rigidbody.position+rigidbody.velocity*2);
 		//rigidbody.velocity = Vector3.zero;
-		rigidbody.velocity/= 2;
+		rigidbody.velocity*= 0.9f;
 		rigidbody.
 		// aim the rotation forwards
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
