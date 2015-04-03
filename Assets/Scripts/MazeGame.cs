@@ -20,10 +20,10 @@ public class MazeGame:MonoBehaviour {
 	public Material cellWallMat;
 	public Material cellWallTopMat;
 
+	public Material skyboxMaterial;
 	public float radius;
 	public Key key;
 	public GameObject door;
-	public GameObject player_control;
 	//private GameObject player_collider;
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
@@ -36,7 +36,8 @@ public class MazeGame:MonoBehaviour {
 	public AudioClip lightsOutInit;
 	public AudioClip lightOff;
 
-
+	public Lamp lamp;
+	private GameObject lantern;
 
 	// Use this for initialization
 	void Start() {
@@ -52,6 +53,17 @@ public class MazeGame:MonoBehaviour {
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
 
+		// initialize this
+		transform.position = mazeStruct.GetStartSphere();
+		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
+		skyboxMaterial.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
+		GetComponent<OVRCameraRig>().Init();
+		gameObject.AddComponent<Rigidbody>().useGravity = false;
+		CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
+		collider.material = (PhysicMaterial)Resources.Load("WallPhysics", typeof(PhysicMaterial));
+		collider.height = 2;
+		collider.center = new Vector3(0, .4f, 0);
+
 		// initialize other objects
 		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-5);
 		Quaternion keyRot = Quaternion.LookRotation(Vector3.Cross(-keyPos, Vector3.one), -keyPos);
@@ -60,16 +72,90 @@ public class MazeGame:MonoBehaviour {
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
 
 		// create and initialize player and monster
-		GameObject player = (GameObject)Instantiate(player_control.gameObject, new Vector3(1, 1.11f, 1), Quaternion.identity);
+		print("Monster: "+monster);
 		monster = (Monster)Instantiate(monster, new Vector3(4.79f, 47.36f, -.038f), Quaternion.identity);
-		AudioSource src = player.AddComponent<AudioSource>();
+		AudioSource src = gameObject.AddComponent<AudioSource>();
 		src.clip = lightsOutInit;
-		player.AddComponent<Player>().Init(lights, cells, door, key, Resources.Load<Material>("Overcast2 Skybox"), radius, mazeStruct, monster, src);
 		monster.gameObject.SetActive(false);
 
-		AudioSource src1 = player.AddComponent<AudioSource>();
+		AudioSource src1 = gameObject.AddComponent<AudioSource>();
 		src1.clip = lightOff;
 		lights.Init(mazeStruct, cells, src1);
+
+	}
+
+	void Update() {
+		// calculate up, forwards and right
+		Vector3 up = -transform.position.normalized;
+		Vector3 forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
+		if (Vector3.Angle(up, forwards)<90)
+			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+		Vector3 rights = Vector3.Cross(forwards, up).normalized;
+
+		// handle camera angle (from mouse movement)
+		if (Input.GetAxis("Mouse X")>0)
+			forwards = Vector3.RotateTowards(forwards, -rights, Input.GetAxis("Mouse X")/4, 1);
+		else
+			forwards = Vector3.RotateTowards(forwards, rights, -Input.GetAxis("Mouse X")/4, 1);
+		rights = Vector3.Cross(forwards, up).normalized;
+		//transform.rotation.SetFromToRotation(-transform.position, forwards);
+
+		//Quaternion.RotateTowards(Quaternion.Euler(Vector3.zero),
+		//transform.Rotate(-transform.position, -Input.GetAxis("Mouse X")*10);
+		//transform.Rotate(transform.right.normalized, Input.GetAxis("Mouse Y")*10);
+
+		// sum the WASD/Arrows movement
+		float forward = 0, right = 0;
+		if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
+			forward += 1;
+		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+			forward -= 1;
+		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			right += 1;
+		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			right -= 1;
+
+
+		// calculate where to move, then move
+		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
+
+		if (rigidbody.position.magnitude>radius-3.5f)
+			rigidbody.MovePosition(rigidbody.position.normalized*(radius - 3.5f));
+		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+		//rigidbody.velocity*= 0.9f;
+		
+		rigidbody.
+			// aim the rotation forwards
+		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
+	}
+
+	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
+	void OnTriggerEnter(Collider collider) {
+		Debug.Log(collider.name);
+
+		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
+		if (collider.GetComponent<Key>() == key) {
+			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.1f;
+			door.SetActive(false);
+			collider.gameObject.SetActive(false);
+			lights.keyTime = 0;
+			print(skyboxMaterial.GetColor("_Tint"));
+			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
+			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
+			//gameObject.GetComponentInChildren<Light>().enabled = true;
+			//gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
+			this.lamp.gameObject.SetActive(true);
+			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
+
+			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			sphere.transform.localScale = new Vector3(95, 95, 95);
+			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
+			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
+		}
+		if (collider.GetComponent<Lamp>() == lamp) {
+			collider.gameObject.SetActive(false);
+			this.lantern.SetActive(true);
+		}
 
 	}
 }

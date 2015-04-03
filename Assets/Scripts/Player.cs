@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Player:MonoBehaviour {
 
-	private LightSystem lights;
+	/*private LightSystem lights;
 	private GameObject door;
 	private Key key;
 	public Material skyboxMaterial;
@@ -115,5 +115,5 @@ public class Player:MonoBehaviour {
 			this.lantern.SetActive(true);
 		}
 
-	}
+	}*/
 }
