@@ -13,7 +13,7 @@ public class MazeCell:MonoBehaviour {
 	/// Initializes the MazeCell. pos is in data-space.
 	/// </summary>
 	public void Init(MazeStructure mazeStruct, Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
-		Material cellWallTopMat, AnimationCurve curve, VectorSpaceish vectors) {
+		Material cellWallTopMat, VectorSpaceish vectors) {
 
 		// create cell floor
 		floor = new GameObject("floor - "+cellFloor.name);

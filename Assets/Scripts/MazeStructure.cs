@@ -17,6 +17,13 @@ public class MazeStructure {
 	private HashSet<Point3> sliding=new HashSet<Point3>();
 	private GameObject doorObj;
 
+	Mesh floor;
+	Mesh[] cellWalls;
+	Mesh[] cellWallTops;
+	Material cellFloorMat;
+	Material cellWallMat;
+	Material cellWallTopMat;
+
 	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, float radius) {
 		// initialize data
 		this.mazeTool = top;
@@ -117,7 +124,17 @@ public class MazeStructure {
 	/// Returns the GameObject that corresponds to the door.
 	/// </summary>
 	public void RemoveDoor() {
-		throw new Exception("Not implemented");
+		Point3[] gpts = Point3FromDataToGame(door);
+		Point3[] dpts = new Point3[2];
+		dpts[0] = Point3FromGameToData(new Point3[]{gpts[0]});
+		dpts[1] = Point3FromGameToData(new Point3[]{gpts[1]});
+		GameObject obj0 = cells[gpts[0].x, gpts[0].y, gpts[0].z].gameObject;
+		GameObject obj1 = cells[gpts[1].x, gpts[1].y, gpts[1].z].gameObject;
+		data[door.x, door.y, door.z] = false;
+		cells[gpts[0].x, gpts[0].y, gpts[0].z] = MakeMazeCell(dpts[0], obj0.transform.parent.gameObject);
+		cells[gpts[1].x, gpts[1].y, gpts[1].z] = MakeMazeCell(dpts[1], obj1.transform.parent.gameObject);
+		GameObject.Destroy(obj0);
+		GameObject.Destroy(obj1);
 	}
 
 	/// <summary>
@@ -200,8 +217,8 @@ public class MazeStructure {
 	/// Takes a Vector3 in cube-space and returns a corresponding Point3 in game-space.
 	/// </summary>
 	public Point3 FromCubeToGame(Vector3 v) {
-		return new Point3(v/2)+1;
-		// p = new Point3(2*v-1)/2
+		//return new Point3(v/2)+1;
+		return new Point3(v)+1;
 	}
 
 	/// <summary>
@@ -219,7 +236,6 @@ public class MazeStructure {
 	/// </summary>
 	public Vector3 Vector3FromCubeToSphere(Vector3 v) {
 		Point3 p = FromCubeToGame(v);
-		Debug.Log("p: "+p);
 		Vector3 floor = cells[p.x, p.y, p.z].GetFloor(v);
 		return Vector3FromCubeToSphere(v, floor);
 	}
@@ -266,49 +282,20 @@ public class MazeStructure {
 		return v;
 	}
 
-	public Vector3 Move(Vector3 from, Vector3 to) {
-		/*Func<Vector3, Point3> convert = (v)=> Point3FromGameToData(new Point3[]{FromCubeToGame(Vector3FromSphereToCube(v, length, radius))});
-		Point3 start = convert(from.normalized*radius);
-		Point3 end = convert(to.normalized*radius);
-
-		// calculate offsets from "to"
-		Point3[] offsets = Point3.zero.neighbors();
-		for (int i=0; i<offsets.Length; ++i)
-			offsets[i] = convert(to+(offsets[i].ToVector3()/10));
-
-		// check if near an invalid wall
-		for (int i=0; i<offsets.Length; ++i) {
-			// count the number of different fields between offsets[i] and start
-			int diff=0;
-			for (int j=0; j<3; ++j)
-				if (offsets[i][j]!=start[j])
-					++diff;
-
-			// if no differences, continue
-			if (diff==0)
-				continue;
-
-			// if one difference, check if the move is valid
-			if (diff==1) {
-				if (ValidMove(start, offsets[i]))
-					continue;
-				else
-					return from;
-			}
-
-			// if multiple differences, move is invalid
-			if (diff==2)
-				return from;
-		}*/
-
-		return to;
-	}
-
 	/// <summary>
 	/// Returns a 3D array of MazeCells that create a sphere, with indexes in game-space.
 	/// </summary>
 	public MazeCell[, ,] MakeCells(Mesh floor, Mesh[] cellWalls, Mesh[] cellWallTops, Material cellFloorMat,
 		Material cellWallMat, Material cellWallTopMat, AnimationCurve flicker, float radius) {
+
+		// store variables
+		this.floor = floor;
+		this.cellWalls = cellWalls;
+		this.cellWallTops = cellWallTops;
+		this.cellFloorMat = cellFloorMat;
+		this.cellWallMat = cellWallMat;
+		this.cellWallTopMat = cellWallTopMat;
+
 		GameObject container = new GameObject("Maze-Sphere Container");
 		MazeCell[, ,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
 		bool[, ,] visited = new bool[data.GetLength(0), data.GetLength(1), data.GetLength(2)];
@@ -317,10 +304,10 @@ public class MazeStructure {
 			for (int j=0; j<visited.GetLength(1); ++j)
 				for (int k=0; k<visited.GetLength(2); ++k)
 					visited[i, j, k] = true;
-				for (int i=0; i<3; ++i)
-					for (int j=0; j<3; ++j)
-						for (int k=0; k<3; ++k)
-							visited[i, j, k] = false;*/
+		for (int i=0; i<5; ++i)
+			for (int j=0; j<5; ++j)
+				for (int k=0; k<5; ++k)
+					visited[i, j, k] = false;*/
 		int count=0;
 
 		// iterate over {x, y, z}
@@ -336,8 +323,6 @@ public class MazeStructure {
 					for (int j=1; j<data.GetLength((yIndex+2)%3); j+=2) {
 						int xIndex = (yIndex+(side==1?1:2))%3;
 						int zIndex = (yIndex+(side==1?2:1))%3;
-						//int xIndex2 = (yIndex+1)%3;
-						//int yIndex2 = (yIndex+2)%3;
 
 						// create a Point3 that corresponds to the current location in data-space
 						Point3 p = Point3.zero;
@@ -353,91 +338,7 @@ public class MazeStructure {
 						if (++count>1000)
 							throw new Exception("count>1000");
 
-						// create a vector space
-						MazeCell.VectorSpaceish v = new MazeCell.VectorSpaceish();
-						v.AddAll((p-1).ToVector3()/2);
-						v.AddAll((side==1?(side-1)/2:(side+1)/2) - (p[yIndex]-1)/2f, yIndex);
-						v.AddX1(1, xIndex);
-						int yDiff = (side==1?1:-1);
-						v.vy[yIndex] = yDiff;
-						v.AddZ1(1, zIndex);
-
-						// find cellWallIndex using a 2D point space
-						int cellWallIndex=0;
-						Point3 right = Point3.zero;
-						right[xIndex] = 2;
-						Point3 forward = Point3.zero;
-						forward[zIndex] = 2;
-						Point3 up = Point3.zero;
-						up[yIndex] = 2;
-
-						// calculate the index of cellWalls and cellWallTops to use
-						cellWallIndex += ValidMove(p, p+right)?0:8;
-						cellWallIndex += ValidMove(p, p+forward)?0:4;
-						cellWallIndex += ValidMove(p, p-right)?0:2;
-						cellWallIndex += ValidMove(p, p-forward)?0:1;
-
-						// if the cell is on an edge, modify the vector space and cellWallIndex
-						if (IsEdge(p)) {
-							// modify the vector space and cellWallIndex
-							if (i==1) {
-								v.AddX0(yDiff, yIndex);
-								v.vy[xIndex] = 1;
-								cellWallIndex -= ValidMove(p, p+up)?2:0;
-								cellWallIndex -= ValidMove(p, p-up)?2:0;
-							} else if (i==data.GetLength((yIndex+1)%3)-2) {
-								v.AddX1(yDiff, yIndex);
-								v.vy[xIndex] = -1;
-								cellWallIndex -= ValidMove(p, p+up)?8:0;
-								cellWallIndex -= ValidMove(p, p-up)?8:0;
-							} else if (j==1) {
-								v.AddZ0(yDiff, yIndex);
-								v.vy[zIndex] = 1;
-								cellWallIndex -= ValidMove(p, p+up)?1:0;
-								cellWallIndex -= ValidMove(p, p-up)?1:0;
-							} else if (j==data.GetLength((yIndex+1)%3)-2) {
-								v.AddZ1(yDiff, yIndex);
-								v.vy[zIndex] = -1;
-								cellWallIndex -= ValidMove(p, p+up)?4:0;
-								cellWallIndex -= ValidMove(p, p-up)?4:0;
-							}
-							v.vy.Normalize();
-
-							// calculate the index of cellWalls and cellWallTops to use
-						}
-
-						// if the cell is on a corner, corner vector space
-						if (IsCorner(p)) {
-							// modify the vector space
-							if (i==1 && j==1) {
-								v.v10[yIndex] += yDiff;
-								v.v00[xIndex] += 1;
-								v.vy[zIndex] = v.vy[xIndex];
-							} else if (i==1 && j==data.GetLength((yIndex+2)%3)-2) {
-								v.v11[yIndex] += yDiff;
-								v.v01[xIndex] += 1;
-								v.vy[zIndex] = -v.vy[xIndex];
-							} else if (i==data.GetLength((yIndex+1)%3)-2 && j==1) {
-								v.v00[yIndex] += yDiff;
-								v.v10[xIndex] -= 1;
-								v.vy[zIndex] = -v.vy[xIndex];
-							} else {
-								v.v01[yIndex] += yDiff;
-								v.v11[xIndex] -= 1;
-								v.vy[zIndex] = v.vy[xIndex];
-							}
-							v.vy.Normalize();
-
-							// calculate the index of cellWalls and cellWallTops to use
-						}
-
-						// create the MazeCell
-						MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();
-						cell.transform.parent = parent.transform;
-						//Debug.Log("cellWallIndex: "+cellWallIndex);
-						cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
-							cellWallTopMat, flicker, v);
-						result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = cell;
+						result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = MakeMazeCell(p, parent);
 					}
 				}
 			}
@@ -446,21 +347,123 @@ public class MazeStructure {
 		return result;
 	}
 
-	/*private int GetCellWallIndex(Point3 pos) {
+	private MazeCell MakeMazeCell(Point3 p, GameObject parent) {
+		// find variables
+		int yIndex;
+		if (p.x==1||p.x==data.GetLength(0)-2)
+			yIndex = 0;
+		else if (p.y==1||p.y==data.GetLength(1)-2)
+			yIndex = 1;
+		else if (p.z==1||p.z==data.GetLength(2)-2)
+			yIndex = 2;
+		else
+			throw new Exception("invalid point in MakeMazeCell("+p+", parent)");
+		int side = p[yIndex];
+		int xIndex = (yIndex+(side==1?1:2))%3;
+		int zIndex = (yIndex+(side==1?2:1))%3;
+		int i = p[xIndex];
+		int j = p[zIndex];
 
-	}*/
+		// create a vector space
+		MazeCell.VectorSpaceish v = new MazeCell.VectorSpaceish();
+		v.AddAll((p-1).ToVector3()/2);
+		v.AddAll((side==1?(side-1)/2:(side+1)/2) - (p[yIndex]-1)/2f, yIndex);
+		v.AddX1(1, xIndex);
+		int yDiff = (side==1?1:-1);
+		v.vy[yIndex] = yDiff;
+		v.AddZ1(1, zIndex);
+
+		// find cellWallIndex using a 2D point space
+		int cellWallIndex=0;
+		Point3 right = Point3.zero;
+		right[xIndex] = 2;
+		Point3 forward = Point3.zero;
+		forward[zIndex] = 2;
+		Point3 up = Point3.zero;
+		up[yIndex] = 2;
+
+		// calculate the index of cellWalls and cellWallTops to use
+		cellWallIndex += ValidMove(p, p+right)?0:8;
+		cellWallIndex += ValidMove(p, p+forward)?0:4;
+		cellWallIndex += ValidMove(p, p-right)?0:2;
+		cellWallIndex += ValidMove(p, p-forward)?0:1;
+
+		// if the cell is on an edge, modify the vector space and cellWallIndex
+		if ((i==1||i==data.GetLength((yIndex+1)%3)-2) || (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+			// modify the vector space and cellWallIndex
+			if (i==1) {
+				v.AddX0(yDiff, yIndex);
+				v.vy[xIndex] = 1;
+				cellWallIndex -= ValidMove(p, p+up)?2:0;
+				cellWallIndex -= ValidMove(p, p-up)?2:0;
+			} else if (i==data.GetLength((yIndex+1)%3)-2) {
+				v.AddX1(yDiff, yIndex);
+				v.vy[xIndex] = -1;
+				cellWallIndex -= ValidMove(p, p+up)?8:0;
+				cellWallIndex -= ValidMove(p, p-up)?8:0;
+			} else if (j==1) {
+				v.AddZ0(yDiff, yIndex);
+				v.vy[zIndex] = 1;
+				cellWallIndex -= ValidMove(p, p+up)?1:0;
+				cellWallIndex -= ValidMove(p, p-up)?1:0;
+			} else if (j==data.GetLength((yIndex+1)%3)-2) {
+				v.AddZ1(yDiff, yIndex);
+				v.vy[zIndex] = -1;
+				cellWallIndex -= ValidMove(p, p+up)?4:0;
+				cellWallIndex -= ValidMove(p, p-up)?4:0;
+			}
+			v.vy.Normalize();
+
+			// calculate the index of cellWalls and cellWallTops to use
+		}
+
+		// if the cell is on a corner, corner vector space
+		if ((i==1||i==data.GetLength((yIndex+1)%3)-2) && (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+			// modify the vector space
+			if (i==1 && j==1) {
+				v.v10[yIndex] += yDiff;
+				v.v00[xIndex] += 1;
+				v.vy[zIndex] = v.vy[xIndex];
+			} else if (i==1 && j==data.GetLength((yIndex+2)%3)-2) {
+				v.v11[yIndex] += yDiff;
+				v.v01[xIndex] += 1;
+				v.vy[zIndex] = -v.vy[xIndex];
+			} else if (i==data.GetLength((yIndex+1)%3)-2 && j==1) {
+				v.v00[yIndex] += yDiff;
+				v.v10[xIndex] -= 1;
+				v.vy[zIndex] = -v.vy[xIndex];
+			} else {
+				v.v01[yIndex] += yDiff;
+				v.v11[xIndex] -= 1;
+				v.vy[zIndex] = v.vy[xIndex];
+			}
+			v.vy.Normalize();
+
+			// calculate the index of cellWalls and cellWallTops to use
+		}
+
+		// create the MazeCell
+		MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();
+		cell.transform.parent = parent.transform;
+		//Debug.Log("cellWallIndex: "+cellWallIndex);
+		cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
+			cellWallTopMat, v);
+		return cell;
+	}
 
 	private bool IsEdge(Point3 pos) {
 		int count=0;
 		for (int i=0; i<3; ++i)
-			count += (pos[i]<2 || pos[i]>data.GetLength(i)-3)?1:0;
-		return count==2;
+			if (pos[i]<2 || pos[i]>data.GetLength(i)-3)
+				++count;
+		return count>1;
 	}
 
 	private bool IsCorner(Point3 pos) {
 		int count=0;
 		for (int i=0; i<3; ++i)
-			count += (pos[i]<2 || pos[i]>data.GetLength(i)-3)?1:0;
+			if (pos[i]<2 || pos[i]>data.GetLength(i)-3)
+				++count;
 		return count==3;
 	}
 }

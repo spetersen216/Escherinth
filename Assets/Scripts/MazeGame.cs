@@ -20,6 +20,7 @@ public class MazeGame:MonoBehaviour {
 	public Material cellWallMat;
 	public Material cellWallTopMat;
 
+	private float angle;
 	public Material skyboxMaterial;
 	public float radius;
 	public Key key;
@@ -77,6 +78,7 @@ public class MazeGame:MonoBehaviour {
 		AudioSource src = gameObject.AddComponent<AudioSource>();
 		src.clip = lightsOutInit;
 		monster.gameObject.SetActive(false);
+		angle = Mathf.PI/2;
 
 		AudioSource src1 = gameObject.AddComponent<AudioSource>();
 		src1.clip = lightOff;
@@ -92,17 +94,12 @@ public class MazeGame:MonoBehaviour {
 			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
 		Vector3 rights = Vector3.Cross(forwards, up).normalized;
 
-		// handle camera angle (from mouse movement)
+		// handle left-right camera movement (from mouse)
 		if (Input.GetAxis("Mouse X")>0)
 			forwards = Vector3.RotateTowards(forwards, -rights, Input.GetAxis("Mouse X")/4, 1);
 		else
 			forwards = Vector3.RotateTowards(forwards, rights, -Input.GetAxis("Mouse X")/4, 1);
 		rights = Vector3.Cross(forwards, up).normalized;
-		//transform.rotation.SetFromToRotation(-transform.position, forwards);
-
-		//Quaternion.RotateTowards(Quaternion.Euler(Vector3.zero),
-		//transform.Rotate(-transform.position, -Input.GetAxis("Mouse X")*10);
-		//transform.Rotate(transform.right.normalized, Input.GetAxis("Mouse Y")*10);
 
 		// sum the WASD/Arrows movement
 		float forward = 0, right = 0;
@@ -118,15 +115,17 @@ public class MazeGame:MonoBehaviour {
 
 		// calculate where to move, then move
 		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
-
+		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
 		if (rigidbody.position.magnitude>radius-3.5f)
 			rigidbody.MovePosition(rigidbody.position.normalized*(radius - 3.5f));
-		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-		//rigidbody.velocity*= 0.9f;
-		
-		rigidbody.
-			// aim the rotation forwards
+
+		// handle up-down camera movement (from mouse, from sphere)
+		if (angle<Mathf.PI/2)
+			forwards = Vector3.RotateTowards(up, forwards, angle, 1);
+		else
+			forwards = Vector3.RotateTowards(forwards, -up, angle-Mathf.PI/2, 1);
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
+		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.99f*Mathf.PI), 0.01f*Mathf.PI);
 	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
@@ -136,7 +135,7 @@ public class MazeGame:MonoBehaviour {
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
 			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.1f;
-			door.SetActive(false);
+			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
 			print(skyboxMaterial.GetColor("_Tint"));
