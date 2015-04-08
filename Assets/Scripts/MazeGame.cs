@@ -59,7 +59,8 @@ public class MazeGame:MonoBehaviour {
 		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
 		skyboxMaterial.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
 		GetComponent<OVRCameraRig>().Init();
-		gameObject.AddComponent<Rigidbody>().useGravity = false;
+		gameObject.AddComponent<Rigidbody>().freezeRotation = true;
+		Physics.gravity = Vector3.zero;
 		CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
 		collider.material = (PhysicMaterial)Resources.Load("WallPhysics", typeof(PhysicMaterial));
 		collider.height = 2;
@@ -116,8 +117,7 @@ public class MazeGame:MonoBehaviour {
 		// calculate where to move, then move
 		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
 		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-		if (rigidbody.position.magnitude>radius-3.5f)
-			rigidbody.MovePosition(rigidbody.position.normalized*(radius - 3.5f));
+		rigidbody.MovePosition(rigidbody.position.normalized*(radius-3.5f));
 
 		// handle up-down camera movement (from mouse, from sphere)
 		if (angle<Mathf.PI/2)
