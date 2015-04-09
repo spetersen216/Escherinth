@@ -14,7 +14,7 @@ public class Pathfinding {
 		// initialize member variables
 		this.center = center;
 		this.maze = maze;
-		Debug.Log(center);
+		//Debug.Log(center);
 		data = new int[walls.GetLength(0), walls.GetLength(1), walls.GetLength(2)];
 		data.Initialize();
 
@@ -47,13 +47,13 @@ public class Pathfinding {
 	/// This includes both endpoints.
 	/// </summary>
 	public Point3[] PathToPoint(Point3 target) {
-		Debug.Log("PathToPoint("+center+", "+target+")");
+		//Debug.Log("PathToPoint("+center+", "+target+")");
 		target = maze.Point3FromGameToData(new Point3[] { target });
 		Point3[] result = new Point3[data[target.x, target.y, target.z]+1];
 		int index = result.Length;
 
 		while (target!=center) {
-			Debug.Log(target);
+			//Debug.Log(target);
 			Point3 previous = target;
 			Point3[] neighbors = target.neighbors(2);
 			foreach (Point3 newPos in neighbors) {
@@ -65,12 +65,12 @@ public class Pathfinding {
 			}
 			// if no valid neighbor was found, there is no path
 			if (target==previous) {
-				Debug.Log("Null");
+				//Debug.Log("Null");
 				return null;
 			}
 		}
 		result[--index] = maze.Point3FromDataToGame(target)[0];
-		Debug.Log("Index: "+index);
+		//Debug.Log("Index: "+index);
 		return result;
 	}
 

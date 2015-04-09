@@ -81,7 +81,7 @@ public class MazeGame:MonoBehaviour {
 		lantern.SetActive(false);
 
 		// create and initialize player and monster
-		print("Monster: "+monster);
+		//print("Monster: "+monster);
 		monster = (Monster)Instantiate(monster, new Vector3(4.79f, 47.36f, -.038f), Quaternion.identity);
 		AudioSource src = gameObject.AddComponent<AudioSource>();
 		src.clip = lightsOutInit;
@@ -137,7 +137,7 @@ public class MazeGame:MonoBehaviour {
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
 	void OnTriggerEnter(Collider collider) {
-		Debug.Log(collider.name);
+		//Debug.Log(collider.name);
 
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
@@ -145,7 +145,7 @@ public class MazeGame:MonoBehaviour {
 			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
-			print(skyboxMaterial.GetColor("_Tint"));
+			//print(skyboxMaterial.GetColor("_Tint"));
 			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
 			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
 			//gameObject.GetComponentInChildren<Light>().enabled = true;

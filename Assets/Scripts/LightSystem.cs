@@ -11,11 +11,12 @@ public class LightSystem:MonoBehaviour {
 	public MazeCell[,,] cells;
 	private Pathfinding path;
 	public String test;
-
+	private AudioSource sound;
 
 	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells, AudioSource lightOff) {
 		this.cells = cells;
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
+		this.sound = lightOff;
 	}
 
 
@@ -30,6 +31,11 @@ public class LightSystem:MonoBehaviour {
 						if (cells[i, j, k] != null) {
 							byte value = (byte)Mathf.Max(Mathf.Min(GetLightAtPoint(i, j, k), 255), 130);
 							cells[i, j, k].SetBrightness(new Color32(value, value, value, 255)); //= Mathf.Max(Mathf.Min(GetLightAtPoint(i, j), 2), 0);
+							if(!this.sound.isPlaying && this.keyTime < 0 && this.keyTime > -45){
+								this.sound.volume = .5f;
+								this.sound.Play();
+								//Debug.Log ("KEYTIME ***** " + this.keyTime);
+							}	
 						}
 					}
 				}
