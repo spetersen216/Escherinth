@@ -61,17 +61,24 @@ public class MazeGame:MonoBehaviour {
 		GetComponent<OVRCameraRig>().Init();
 		gameObject.AddComponent<Rigidbody>().freezeRotation = true;
 		Physics.gravity = Vector3.zero;
-		CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
+		SphereCollider collider = gameObject.AddComponent<SphereCollider>();
 		collider.material = (PhysicMaterial)Resources.Load("WallPhysics", typeof(PhysicMaterial));
-		collider.height = 2;
+		collider.radius = 1.5f;
 		collider.center = new Vector3(0, .4f, 0);
 
 		// initialize other objects
-		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-5);
+		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-2.5f);
 		Quaternion keyRot = Quaternion.LookRotation(Vector3.Cross(-keyPos, Vector3.one), -keyPos);
 		key = (Key)Instantiate(key, keyPos, keyRot);
 		cLight = ((GameObject)Instantiate(cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
 		lights = ((GameObject)Instantiate(lights.gameObject, new Vector3(85.4f, 100f, 100f), Quaternion.identity)).GetComponent<LightSystem>();
+
+		lamp = ((GameObject)Instantiate(lamp.gameObject, lamp.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Lamp>();
+		lamp.transform.rotation = Quaternion.Euler(70.7834f,342.207f,321.425f);
+		lamp.gameObject.SetActive (false);
+
+		lantern = GameObject.Find("Lantern");
+		lantern.SetActive(false);
 
 		// create and initialize player and monster
 		print("Monster: "+monster);
@@ -134,7 +141,7 @@ public class MazeGame:MonoBehaviour {
 
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
-			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.1f;
+			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.2f;
 			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
@@ -152,8 +159,11 @@ public class MazeGame:MonoBehaviour {
 			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
 		}
 		if (collider.GetComponent<Lamp>() == lamp) {
+			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.0f;
 			collider.gameObject.SetActive(false);
 			this.lantern.SetActive(true);
+
+
 		}
 
 	}

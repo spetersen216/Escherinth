@@ -157,7 +157,7 @@ public class OVRManager : MonoBehaviour
 	{
 		get {
 #if !UNITY_ANDROID || UNITY_EDITOR
-			return capiHmd.GetHSWDisplayState().Displayed;
+			return true;//capiHmd.GetHSWDisplayState().Displayed;
 #else
 			return false;
 #endif
