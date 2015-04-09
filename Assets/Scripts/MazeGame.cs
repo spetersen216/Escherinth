@@ -154,7 +154,7 @@ public class MazeGame:MonoBehaviour {
 			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			sphere.transform.localScale = new Vector3(95, 95, 95);
+			sphere.transform.localScale = new Vector3(96, 96, 96);
 			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
 			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
 		}
@@ -162,6 +162,19 @@ public class MazeGame:MonoBehaviour {
 			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.0f;
 			collider.gameObject.SetActive(false);
 			this.lantern.SetActive(true);
+			Light[] l = this.lantern.GetComponentsInChildren<Light>();
+
+			GameObject.Find("Sphere").renderer.material.color = new Color(0,0,0,.8f);
+
+			foreach(Light light in l){
+				if(light.enabled == false){
+					light.enabled = true;
+				}
+				if(light.type == LightType.Directional){
+					light.transform.rotation = gameObject.transform.rotation;
+				}
+			}
+
 
 
 		}
