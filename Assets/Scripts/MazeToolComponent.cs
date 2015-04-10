@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class MazeToolComponent:MonoBehaviour {
 	public bool selectMazeTool=false;
 	public static bool scaleGizmoIcon=false;
@@ -11,12 +11,12 @@ public class MazeToolComponent:MonoBehaviour {
 	public virtual void Update() {
 		if (selectMazeTool) {
 			selectMazeTool = false;
-			Selection.activeGameObject = transform.parent.parent.gameObject;
+//			Selection.activeGameObject = transform.parent.parent.gameObject;
 		}
 	}
 }
 
-[CustomEditor(typeof(MazeToolWall))]
+/*[CustomEditor(typeof(MazeToolWall))]
 public class MazeToolWallEditor:Editor {
 	public override void OnInspectorGUI() {
 		base.OnInspectorGUI();
@@ -31,4 +31,4 @@ public class MazeToolCellEditor:Editor {
 		base.OnInspectorGUI();
 		MazeToolComponent.scaleGizmoIcon = EditorGUILayout.Toggle("Scale Gizmo Icons", MazeToolComponent.scaleGizmoIcon);
 	}
-}
+}*/

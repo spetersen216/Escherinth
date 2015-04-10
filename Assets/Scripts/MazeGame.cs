@@ -101,7 +101,6 @@ public class MazeGame:MonoBehaviour {
 		if (Vector3.Angle(up, forwards)<90)
 			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
 		Vector3 rights = Vector3.Cross(forwards, up).normalized;
-		//print("forwards: "+forwards+", up: "+up+"; right: "+rights);
 
 		// handle left-right camera movement (from mouse)
 		if (Input.GetAxis("Mouse X")>0)
@@ -121,10 +120,11 @@ public class MazeGame:MonoBehaviour {
 		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
 			right -= 1;
 
-		// handle actual movement
-		Vector3 diff = (forward*forwards + right*transform.right.normalized).normalized*15f;
+
+		// calculate where to move, then move
+		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
+		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
 		rigidbody.MovePosition(rigidbody.position.normalized*(radius-3.5f));
-		rigidbody.velocity = diff;
 
 		// handle up-down camera movement (from mouse, from sphere)
 		if (angle<Mathf.PI/2)
@@ -132,7 +132,7 @@ public class MazeGame:MonoBehaviour {
 		else
 			forwards = Vector3.RotateTowards(forwards, -up, angle-Mathf.PI/2, 1);
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
-		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.95f*Mathf.PI), 0.05f*Mathf.PI);
+		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.99f*Mathf.PI), 0.01f*Mathf.PI);
 	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
@@ -154,7 +154,7 @@ public class MazeGame:MonoBehaviour {
 			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			sphere.transform.localScale = new Vector3(96, 96, 96);
+			sphere.transform.localScale = new Vector3(96.8f, 96.8f, 96.8f);
 			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
 			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
 		}

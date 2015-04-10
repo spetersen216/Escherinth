@@ -64,7 +64,8 @@ public class Monster:MonoBehaviour {
 
 		// if the monster and player are in the same cell
 		if ((int)distance+1>path.Length) {
-			throw new Exception("monster hit the player");
+			Application.LoadLevel(Application.loadedLevelName);
+			//throw new Exception("monster hit the player");
 		}
 
 		// handle player movement
@@ -94,10 +95,12 @@ public class Monster:MonoBehaviour {
 				temp[0] = prev1;
 				distance = dist-Mathf.Floor(dist);
 				Debug.Log("start at prev1");
-			} else
+			} else{
 				throw new Exception("monster pathfinding error");
+			}
 			positions = temp;
 			break;
+		
 		}
 
 		// move the monster
