@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -43,7 +43,7 @@ public class MazeStructure {
 			front.walls.GetLength(0)!=length || front.walls.GetLength(1)!=length ||
 			back.walls.GetLength(0)!=length || back.walls.GetLength(1)!=length)
 			throw new Exception("MazeTool lengths don't match.");
-		length /= 2;
+		length = 1+length/2;
 
 		// parse all the mazeTools
 		int high = data.GetLength(0)-2;
@@ -53,12 +53,6 @@ public class MazeStructure {
 		ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
 		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
 		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
-
-		/*startPos = new Point3(3, 1, 3);
-		key = new Point3(5, 19, 5);
-		door = new Point3(2, 1, 1);
-		doorObj = top.walls[11, 8].gameObject;
-		Debug.Log("key is at "+key);*/
 		Debug.Log("key: "+key+"; start: "+startPos+"; monster: "+monsterPos+"; door: "+door);
 	}
 
@@ -265,7 +259,7 @@ public class MazeStructure {
 	public Vector3 Vector3FromSphereToCube(Vector3 v) {
 		// morph into a cube around Vector3.zero
 		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
-		Vector3 floor = v*(0.5f*length/max);
+		Vector3 floor = v*(0.5f*(length-0.01f)/max);
 
 		// translate into a cube with Vector3.zero as the base corner
 		Vector3 center = Vector3.one*(length/2);
@@ -273,6 +267,8 @@ public class MazeStructure {
 
 		// return floor + the appropriate height
 		float height = radius-v.magnitude;
+		Debug.Log("height: "+height);
+		Debug.Log("floor: "+floor);
 		if (floor.x<floor.y && floor.x<floor.z)
 			v = floor+(height*Vector3.right);
 		else if (floor.y<floor.z)
