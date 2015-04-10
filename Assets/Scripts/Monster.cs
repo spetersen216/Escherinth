@@ -86,7 +86,7 @@ public class Monster:MonoBehaviour {
 				}
 				temp[0] = prev2;
 				distance = Mathf.Ceil(dist)-dist;
-				Debug.Log("start at prev2");
+				//Debug.Log("start at prev2");
 			} else if (positions[0]==prev2) {
 				if (positions[1]==prev1) {
 					distance = Mathf.Ceil(dist)-dist;
@@ -94,7 +94,7 @@ public class Monster:MonoBehaviour {
 				}
 				temp[0] = prev1;
 				distance = dist-Mathf.Floor(dist);
-				Debug.Log("start at prev1");
+				//Debug.Log("start at prev1");
 			} else{
 				throw new Exception("monster pathfinding error");
 			}
@@ -153,8 +153,8 @@ public class Monster:MonoBehaviour {
 
 		// fill in positions
 		distance = 0;
-		Debug.Log("path: "+path);
-		Debug.Log("path length: "+path.Length);
+		//Debug.Log("path: "+path);
+		//Debug.Log("path length: "+path.Length);
 		positions = new Vector3[path.Length];
 		for (int i=0; i<positions.Length; ++i) {
 			Point3 p = path[i];

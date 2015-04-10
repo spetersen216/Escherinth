@@ -36,6 +36,7 @@ public class MazeGame:MonoBehaviour {
 	public Light cLight;
 	public AudioClip lightsOutInit;
 	public AudioClip lightOff;
+	private Rigidbody playerRigid;
 
 	public Lamp lamp;
 	private GameObject lantern;
@@ -49,6 +50,7 @@ public class MazeGame:MonoBehaviour {
 			tools[i].gameObject.SetActive(false);
 		}
 
+		
 		// initialize the MazeStructure
 		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
@@ -59,7 +61,8 @@ public class MazeGame:MonoBehaviour {
 		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
 		skyboxMaterial.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
 		GetComponent<OVRCameraRig>().Init();
-		gameObject.AddComponent<Rigidbody>().freezeRotation = true;
+		this.playerRigid = gameObject.AddComponent<Rigidbody> ();
+		this.playerRigid.freezeRotation = true;
 		Physics.gravity = Vector3.zero;
 		SphereCollider collider = gameObject.AddComponent<SphereCollider>();
 		collider.material = (PhysicMaterial)Resources.Load("WallPhysics", typeof(PhysicMaterial));
@@ -123,8 +126,8 @@ public class MazeGame:MonoBehaviour {
 
 		// calculate where to move, then move
 		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
-		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-		rigidbody.MovePosition(rigidbody.position.normalized*(radius-3.5f));
+		this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+		this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-3.5f));
 
 		// handle up-down camera movement (from mouse, from sphere)
 		if (angle<Mathf.PI/2)
