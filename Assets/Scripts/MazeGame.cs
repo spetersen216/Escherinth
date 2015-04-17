@@ -144,6 +144,7 @@ public class MazeGame:MonoBehaviour {
 
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
+			//Time.timeScale = 0;
 			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.2f;
 			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
