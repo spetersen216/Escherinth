@@ -97,45 +97,41 @@ public class MazeGame:MonoBehaviour {
 
 	}
 
-	void Update() {
+	void FixedUpdate() {
 		// calculate up, forwards and right
 		Vector3 up = -transform.position.normalized;
-		Vector3 forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
+		Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
 		if (Vector3.Angle(up, forwards)<90)
 			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
-		Vector3 rights = Vector3.Cross(forwards, up).normalized;
+		Vector3 right = Vector3.Cross(forwards, up).normalized;
 
-		// handle left-right camera movement (from mouse)
-		if (Input.GetAxis("Mouse X")>0)
-			forwards = Vector3.RotateTowards(forwards, -rights, Input.GetAxis("Mouse X")/4, 1);
-		else
-			forwards = Vector3.RotateTowards(forwards, rights, -Input.GetAxis("Mouse X")/4, 1);
-		rights = Vector3.Cross(forwards, up).normalized;
+		// handle left-right camera movement (from keyboard)
+		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
+		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
+		right = Vector3.Cross(forwards, up).normalized;
 
 		// sum the WASD/Arrows movement
-		float forward = 0, right = 0;
+		float forward = 0;
 		if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
 			forward += 1;
 		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
 			forward -= 1;
-		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-			right += 1;
-		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-			right -= 1;
 
 
 		// calculate where to move, then move
-		Vector3 dest = transform.position + (forward*forwards + right*transform.right.normalized).normalized*0.4f;
+		Vector3 dest = transform.position + (forward*forwards).normalized*0.4f;
 		this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
 		this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-3.5f));
 
 		// handle up-down camera movement (from mouse, from sphere)
-		if (angle<Mathf.PI/2)
+		/*if (angle<Mathf.PI/2)
 			forwards = Vector3.RotateTowards(up, forwards, angle, 1);
 		else
 			forwards = Vector3.RotateTowards(forwards, -up, angle-Mathf.PI/2, 1);
+		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.99f*Mathf.PI), 0.01f*Mathf.PI);*/
 		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
-		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.99f*Mathf.PI), 0.01f*Mathf.PI);
 	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"

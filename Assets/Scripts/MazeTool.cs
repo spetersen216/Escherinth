@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
-//using UnityEditor;
+using UnityEditor;
 using System.Collections.Generic;
 using System;
 
-//[ExecuteInEditMode]
+[ExecuteInEditMode]
 public class MazeTool:MonoBehaviour {
 	// change this code to enable builds
 	public GameObject activeGameObject {
-		get { return null;}// Selection.activeGameObject; }
-		set { }//Selection.activeGameObject = value; }
+		get { return Selection.activeGameObject; }
+		set { Selection.activeGameObject = value; }
 	}
 	public bool isRunning {
-		get { return true;}// EditorApplication.isPlaying; }
+		get { return EditorApplication.isPlaying; }
 	}
 	// maze variables
 	public int width=10;
