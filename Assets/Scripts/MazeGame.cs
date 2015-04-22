@@ -13,6 +13,13 @@ public class MazeGame:MonoBehaviour {
 	public MazeTool back;
 	public MazeTool front;
 
+	public float playerSpeed=0.3f;
+	public float playerRunSpeed=0.4f;
+	public float playerHeight=3.5f;
+	public float monsterSpeed=1f;
+	public float monsterHeight=3.5f;
+	public float keyHeight=2.5f;
+
 	public Mesh cellFloor;
 	public Mesh[] cellWalls;
 	public Mesh[] cellWallTops;
@@ -70,7 +77,7 @@ public class MazeGame:MonoBehaviour {
 		collider.center = new Vector3(0, .4f, 0);
 
 		// initialize other objects
-		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-2.5f);
+		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-keyHeight);
 		Quaternion keyRot = Quaternion.LookRotation(Vector3.Cross(-keyPos, Vector3.one), -keyPos);
 		key = (Key)Instantiate(key, keyPos, keyRot);
 		cLight = ((GameObject)Instantiate(cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
@@ -84,7 +91,6 @@ public class MazeGame:MonoBehaviour {
 		lantern.SetActive(false);
 
 		// create and initialize player and monster
-		//print("Monster: "+monster);
 		monster = (Monster)Instantiate(monster, new Vector3(4.79f, 47.36f, -.038f), Quaternion.identity);
 		AudioSource src = gameObject.AddComponent<AudioSource>();
 		src.clip = lightsOutInit;
@@ -121,9 +127,10 @@ public class MazeGame:MonoBehaviour {
 
 
 		// calculate where to move, then move
-		Vector3 dest = transform.position + (forward*forwards).normalized*0.4f;
+		Vector3 dest = transform.position + (forward*forwards).normalized
+			*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
+		this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-playerHeight));
 		this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-		this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-3.5f));
 
 		// handle up-down camera movement (from mouse, from sphere)
 		/*if (angle<Mathf.PI/2)
@@ -151,7 +158,7 @@ public class MazeGame:MonoBehaviour {
 			//gameObject.GetComponentInChildren<Light>().enabled = true;
 			//gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
 			this.lamp.gameObject.SetActive(true);
-			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere());
+			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere(), monsterSpeed, monsterHeight);
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 			sphere.transform.localScale = new Vector3(96.8f, 96.8f, 96.8f);
@@ -174,9 +181,6 @@ public class MazeGame:MonoBehaviour {
 					light.transform.rotation = gameObject.transform.rotation;
 				}
 			}
-
-
-
 		}
 
 	}

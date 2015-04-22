@@ -267,8 +267,8 @@ public class MazeStructure {
 
 		// return floor + the appropriate height
 		float height = radius-v.magnitude;
-		Debug.Log("height: "+height);
-		Debug.Log("floor: "+floor);
+		//Debug.Log("height: "+height);
+		//Debug.Log("floor: "+floor);
 		if (floor.x<floor.y && floor.x<floor.z)
 			v = floor+(height*Vector3.right);
 		else if (floor.y<floor.z)

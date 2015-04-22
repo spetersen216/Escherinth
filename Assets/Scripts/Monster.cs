@@ -11,6 +11,8 @@ public class Monster:MonoBehaviour {
 	public Vector3[] positions;
 	private Vector3 startPos;
 	public float distance=0;
+	private float speed;
+	private float height;
 
 	// sound variables
 	public AudioSource sounds;
@@ -23,11 +25,13 @@ public class Monster:MonoBehaviour {
 	public bool wasInSight=false;
 	public float timeSinceSight;
 
-	public void Init(MazeStructure mazeStruct, MazeCell[, ,] cells, Transform player, Vector3 startPos) {
+	public void Init(MazeStructure mazeStruct, MazeCell[, ,] cells, Transform player, Vector3 startPos, float speed, float height) {
 		this.player = player;
-		this.mazeStruct = mazeStruct; transform.
-		 transform.position = startPos;
+		this.mazeStruct = mazeStruct;
 		this.startPos = startPos;
+		this.speed = speed;
+		this.height = height;
+		transform.position = startPos;
 		sounds = player.gameObject.AddComponent<AudioSource>();
 		sightEstab = Resources.LoadAssetAtPath<AudioClip>("Assets/Sounds/grudge-sound.wav");
 		sightLost = Resources.LoadAssetAtPath<AudioClip>("Assets/Sounds/SuspensefulViolinPopcorn.wav");
@@ -37,7 +41,7 @@ public class Monster:MonoBehaviour {
 
 	void Update() {
 		// handle distance, isStarting
-		distance += Time.deltaTime;
+		distance += speed*Time.deltaTime;
 		if (distance>2)
 			isStarting = false;
 
@@ -63,9 +67,10 @@ public class Monster:MonoBehaviour {
 		}
 
 		// if the monster and player are in the same cell
-		if ((int)distance+1>path.Length) {
-			Application.LoadLevel(Application.loadedLevelName);
-			//throw new Exception("monster hit the player");
+		if (((int)distance)+1>path.Length) {
+			if (!Application.isLoadingLevel)
+				Application.LoadLevel(Application.loadedLevelName);
+			return;
 		}
 
 		// handle player movement
@@ -86,7 +91,6 @@ public class Monster:MonoBehaviour {
 				}
 				temp[0] = prev2;
 				distance = Mathf.Ceil(dist)-dist;
-				//Debug.Log("start at prev2");
 			} else if (positions[0]==prev2) {
 				if (positions[1]==prev1) {
 					distance = Mathf.Ceil(dist)-dist;
@@ -94,13 +98,10 @@ public class Monster:MonoBehaviour {
 				}
 				temp[0] = prev1;
 				distance = dist-Mathf.Floor(dist);
-				//Debug.Log("start at prev1");
-			} else{
+			} else
 				throw new Exception("monster pathfinding error");
-			}
 			positions = temp;
 			break;
-		
 		}
 
 		// move the monster
@@ -159,8 +160,7 @@ public class Monster:MonoBehaviour {
 		for (int i=0; i<positions.Length; ++i) {
 			Point3 p = path[i];
 			Vector3 v = mazeStruct.FromGameToCube(p);
-			positions[i] = mazeStruct.Vector3FromCubeToSphere(v);
-			//print(path[i]+" -> "+v+" -> "+v+" -> "+positions[i]);
+			positions[i] = mazeStruct.Vector3FromCubeToSphere(v).normalized*(mazeStruct.radius-height);
 		}
 	}
 
