@@ -7,11 +7,11 @@
 /*.csproj
 /*.unityproj
 /*.sln
-/*.suo
-/*.user
+#/*.suo
+#/*.user
 /*.userprefs
 /*.pidb
-/*.booproj
+#/*.booproj
 
 #Unity3D Generated File On Crash Reports
 sysinfo.txt
