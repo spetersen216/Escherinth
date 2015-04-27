@@ -9,7 +9,6 @@ public class Monster:MonoBehaviour {
 	private Transform player;
 	public Point3[] path;
 	public Vector3[] positions;
-	private Vector3 startPos;
 	public float distance=0;
 	private float speed;
 	private float height;
@@ -28,7 +27,6 @@ public class Monster:MonoBehaviour {
 	public void Init(MazeStructure mazeStruct, MazeCell[, ,] cells, Transform player, Vector3 startPos, float speed, float height) {
 		this.player = player;
 		this.mazeStruct = mazeStruct;
-		this.startPos = startPos;
 		this.speed = speed;
 		this.height = height;
 		transform.position = startPos;
@@ -37,6 +35,7 @@ public class Monster:MonoBehaviour {
 		sightLost = Resources.LoadAssetAtPath<AudioClip>("Assets/Sounds/SuspensefulViolinPopcorn.wav");
 		gameObject.SetActive(true);
 		mesh = GetComponent<MeshFilter>().mesh;
+		print("monster start pos: "+startPos);
 	}
 
 	void Update() {

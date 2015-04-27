@@ -30,6 +30,8 @@ public class MazeGame:MonoBehaviour {
 	private float angle;
 	public Material skyboxMaterial;
 	public float radius;
+	public bool is3D=true;
+	public bool isScary=true;
 	public Key key;
 	public GameObject door;
 	//private GameObject player_collider;
@@ -38,6 +40,7 @@ public class MazeGame:MonoBehaviour {
 	public GameObject right_cam;
 	public AnimationCurve lightFlicker;
 	public Monster monster;
+	public GameObject torch;
 	private MazeCell[, ,] cells;
 	private GameObject mazeSphere;
 	public Light cLight;
@@ -47,6 +50,10 @@ public class MazeGame:MonoBehaviour {
 
 	public Lamp lamp;
 	private GameObject lantern;
+
+	public void PressButton() {
+		print("button pressed!");
+	}
 
 	// Use this for initialization
 	void Start() {
@@ -59,7 +66,7 @@ public class MazeGame:MonoBehaviour {
 
 		
 		// initialize the MazeStructure
-		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius);
+		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius, is3D, torch);
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
 
@@ -68,7 +75,7 @@ public class MazeGame:MonoBehaviour {
 		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
 		skyboxMaterial.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
 		GetComponent<OVRCameraRig>().Init();
-		this.playerRigid = gameObject.AddComponent<Rigidbody> ();
+		this.playerRigid = gameObject.AddComponent<Rigidbody>();
 		this.playerRigid.freezeRotation = true;
 		Physics.gravity = Vector3.zero;
 		SphereCollider collider = gameObject.AddComponent<SphereCollider>();
@@ -104,41 +111,68 @@ public class MazeGame:MonoBehaviour {
 	}
 
 	void FixedUpdate() {
-		// calculate up, forwards and right
-		Vector3 up = -transform.position.normalized;
-		Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-		if (Vector3.Angle(up, forwards)<90)
-			forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
-		Vector3 right = Vector3.Cross(forwards, up).normalized;
+		if (is3D) {
+			// calculate up, forwards and right
+			Vector3 up = -transform.position.normalized;
+			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
+			if (Vector3.Angle(up, forwards)<90)
+				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+			Vector3 right = Vector3.Cross(forwards, up).normalized;
 
-		// handle left-right camera movement (from keyboard)
-		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-			forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
-		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-			forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
-		right = Vector3.Cross(forwards, up).normalized;
+			// handle left-right camera movement (from keyboard)
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
+			right = Vector3.Cross(forwards, up).normalized;
 
-		// sum the WASD/Arrows movement
-		float forward = 0;
-		if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
-			forward += 1;
-		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-			forward -= 1;
+			// sum the WASD/Arrows movement
+			float forward = 0;
+			if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
+				forward += 1;
+			if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+				forward -= 1;
 
+			// calculate where to move, then move
+			Vector3 dest = transform.position + (forward*forwards).normalized
+				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
+			this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-playerHeight));
+			this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+			transform.localRotation = Quaternion.LookRotation(forwards, up);
+		} // if 2D
+		else {
+			// calculate up, forwards and right
+			Vector3 up = Vector3.up;
+			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
+			if (Vector3.Angle(up, forwards)<90)
+				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+			Vector3 right = Vector3.Cross(forwards, up).normalized;
 
-		// calculate where to move, then move
-		Vector3 dest = transform.position + (forward*forwards).normalized
-			*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
-		this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-playerHeight));
-		this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+			// handle left-right camera movement (from keyboard)
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
+			right = Vector3.Cross(forwards, up).normalized;
 
-		// handle up-down camera movement (from mouse, from sphere)
-		/*if (angle<Mathf.PI/2)
-			forwards = Vector3.RotateTowards(up, forwards, angle, 1);
-		else
-			forwards = Vector3.RotateTowards(forwards, -up, angle-Mathf.PI/2, 1);
-		angle = Mathf.Max(Mathf.Min(angle-Input.GetAxis("Mouse Y")/4, 0.99f*Mathf.PI), 0.01f*Mathf.PI);*/
-		transform.localRotation = Quaternion.LookRotation(forwards, -transform.position);
+			// sum the WASD/Arrows movement
+			float forward = 0;
+			if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
+				forward += 1;
+			if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+				forward -= 1;
+
+			Vector3 dest = transform.position + (forward*forwards).normalized
+				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
+			Vector3 v = playerRigid.position;
+			v[1] = playerHeight;
+			this.playerRigid.MovePosition(v);
+			this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+			transform.localRotation = Quaternion.LookRotation(forwards, up);
+		}
+
+if (Input.GetKeyDown(KeyCode.Space))
+	GetComponent<OVRManager>().enabled = !GetComponent<OVRManager>().enabled;
 	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"

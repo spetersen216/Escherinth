@@ -6,6 +6,7 @@ public class MazeCell:MonoBehaviour {
 	private GameObject floor;
 	private GameObject wall;
 	private GameObject wallTop;
+	private GameObject torch;
 	private GameObject[] children;
 	public Plane plane;
 
@@ -13,7 +14,7 @@ public class MazeCell:MonoBehaviour {
 	/// Initializes the MazeCell. pos is in data-space.
 	/// </summary>
 	public void Init(MazeStructure mazeStruct, Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
-		Material cellWallTopMat, VectorSpaceish vectors) {
+		Material cellWallTopMat, SquareTransformer vectors, GameObject torch, Point3 torchSide) {
 
 		// create cell floor
 		floor = new GameObject("floor - "+cellFloor.name);
@@ -35,14 +36,19 @@ public class MazeCell:MonoBehaviour {
 		wallTop.transform.parent = transform;
 
 		plane = new Plane(vectors.vy, vectors.v00);
-		children = new GameObject[]{floor, wall, wallTop};
+		children = new GameObject[] { floor, wall, wallTop };
+
+		// place torch
+		if (torch!=null) {
+
+		}
 	}
 
 	public Vector3 GetFloor(Vector3 v) {
 		return v - plane.normal*plane.GetDistanceToPoint(v);
 	}
 
-	private Mesh Morph(Mesh m, MazeStructure mazeStruct, VectorSpaceish vectors, bool invertTris) {
+	private Mesh Morph(Mesh m, MazeStructure mazeStruct, SquareTransformer vectors, bool invertTris) {
 		Mesh result = new Mesh();
 
 		// create new vertices, the Vector Space given by x,y,z, with base at a
@@ -85,12 +91,12 @@ public class MazeCell:MonoBehaviour {
 	/// <summary>
 	/// This class is used to translate vectors, similar to vector spaces.
 	/// </summary>
-	public class VectorSpaceish {
+	public class SquareTransformer {
 		public Vector3 v00, v10, v01, v11, vy;
 		/// <summary>
 		/// Sets every field to Vector3.zero.
 		/// </summary>
-		public VectorSpaceish() {
+		public SquareTransformer() {
 			v00 = v10 = v01 = v11 = vy = Vector3.zero;
 		}
 

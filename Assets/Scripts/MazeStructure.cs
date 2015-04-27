@@ -9,13 +9,16 @@ public class MazeStructure {
 	private MazeCell[,,] cells;
 	public int length;
 	public float radius;
+	public bool is3D;
+	private float cellDist;
 
 	private Point3 key;
 	private Point3 door;
 	private Point3 startPos;
 	private Point3 monsterPos;
-	private HashSet<Point3> sliding=new HashSet<Point3>();
+	private Dictionary<Point3, Point3> torches=new Dictionary<Point3, Point3>();
 	private GameObject doorObj;
+	private GameObject torch;
 
 	Mesh floor;
 	Mesh[] cellWalls;
@@ -24,35 +27,47 @@ public class MazeStructure {
 	Material cellWallMat;
 	Material cellWallTopMat;
 
-	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back, float radius) {
+	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back,
+		float radius, bool is3D, GameObject torch) {
+
+		// verify that MazeTools have the same dimensions
+		length = bottom.walls.GetLength(0);
+		if (is3D) {
+			if (top.walls.GetLength(0)!=length || top.walls.GetLength(1)!=length ||
+				bottom.walls.GetLength(0)!=length || bottom.walls.GetLength(1)!=length ||
+				left.walls.GetLength(0)!=length || left.walls.GetLength(1)!=length ||
+				right.walls.GetLength(0)!=length || right.walls.GetLength(1)!=length ||
+				front.walls.GetLength(0)!=length || front.walls.GetLength(1)!=length ||
+				back.walls.GetLength(0)!=length || back.walls.GetLength(1)!=length)
+				throw new Exception("MazeTool lengths don't match.");
+		} else {
+			if (bottom.walls.GetLength(1)!=bottom.walls.GetLength(0))
+				throw new Exception("MazeTool dimensions don't match.");
+		}
+		length = 1+length/2;
+
 		// initialize data
+		this.radius = radius;
+		this.is3D = is3D;
 		this.mazeTool = top;
+		this.torch = torch;
+		cellDist = 2*radius/length;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
 			for (int j=0; j<data.GetLength(1); ++j)
 				for (int k=0; k<data.GetLength(2); ++k)
 					data[i, j, k] = true;
 
-		// verify that MazeTools have the same dimensions
-		this.radius = radius;
-		length = top.walls.GetLength(0);
-		if (top.walls.GetLength(0)!=length || top.walls.GetLength(1)!=length ||
-			bottom.walls.GetLength(0)!=length || bottom.walls.GetLength(1)!=length ||
-			left.walls.GetLength(0)!=length || left.walls.GetLength(1)!=length ||
-			right.walls.GetLength(0)!=length || right.walls.GetLength(1)!=length ||
-			front.walls.GetLength(0)!=length || front.walls.GetLength(1)!=length ||
-			back.walls.GetLength(0)!=length || back.walls.GetLength(1)!=length)
-			throw new Exception("MazeTool lengths don't match.");
-		length = 1+length/2;
-
 		// parse all the mazeTools
 		int high = data.GetLength(0)-2;
-		ParseMazeTool(top, (i, j) => new Point3(i+1, high, high-j));
 		ParseMazeTool(bottom, (i, j) => new Point3(i+1, 1, j+1));
-		ParseMazeTool(left, (i, j) => new Point3(1, j+1, i+1));
-		ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
-		ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
-		ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
+		if (is3D) {
+			ParseMazeTool(top, (i, j) => new Point3(i+1, high, high-j));
+			ParseMazeTool(left, (i, j) => new Point3(1, j+1, i+1));
+			ParseMazeTool(right, (i, j) => new Point3(high, j+1, high-i));
+			ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
+			ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
+		}
 		Debug.Log("key: "+key+"; start: "+startPos+"; monster: "+monsterPos+"; door: "+door);
 	}
 
@@ -72,12 +87,7 @@ public class MazeStructure {
 					case MazeToolWall.WallType.door:
 						door = pos;
 						break;
-					case MazeToolWall.WallType.sliding:
-						sliding.Add(pos);
-						break;
 					}
-					if (wall.type==MazeToolWall.WallType.door)
-						door = pos;
 				}
 
 				// parse cells
@@ -92,6 +102,13 @@ public class MazeStructure {
 						break;
 					case MazeToolCell.CellType.key:
 						key = pos;
+						break;
+					case MazeToolCell.CellType.torch:
+						Point2 p = new Point2(i, j);
+						Point2[] neighbors = p.neighbors();
+						for (int k=0; k<4; ++k)
+							if (maze.walls[neighbors[k].x, neighbors[k].y].type==MazeToolWall.WallType.torch)
+								torches[pos] = translate(neighbors[k].x, neighbors[k].y);
 						break;
 					}
 				}
@@ -241,13 +258,16 @@ public class MazeStructure {
 	/// radius is the radius of the sphere.
 	/// </summary>
 	public Vector3 Vector3FromCubeToSphere(Vector3 v, Vector3 floor) {
-		// translate v, center into a cube around Vector3.zero
-		Vector3 center = Vector3.one*(length/2);
-		v -= center;
-		floor -= center;
+		if (is3D) {
+			// translate v, center into a cube around Vector3.zero
+			Vector3 center = Vector3.one*(length/2);
+			v -= center;
+			floor -= center;
 
-		// calculate the result
-		v = floor.normalized*radius*(1-(v-floor).magnitude/length);
+			// calculate the result
+			v = floor.normalized*radius*(1-(v-floor).magnitude/length);
+		} else
+			v *= cellDist;
 		return v;
 	}
 
@@ -257,24 +277,25 @@ public class MazeStructure {
 	/// radius is the radius of the sphere.
 	/// </summary>
 	public Vector3 Vector3FromSphereToCube(Vector3 v) {
-		// morph into a cube around Vector3.zero
-		float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
-		Vector3 floor = v*(0.5f*(length-0.01f)/max);
+		if (is3D) {
+			// morph into a cube around Vector3.zero
+			float max = Mathf.Max(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
+			Vector3 floor = v*(0.5f*(length-0.01f)/max);
 
-		// translate into a cube with Vector3.zero as the base corner
-		Vector3 center = Vector3.one*(length/2);
-		floor += center;
+			// translate into a cube with Vector3.zero as the base corner
+			Vector3 center = Vector3.one*(length/2);
+			floor += center;
 
-		// return floor + the appropriate height
-		float height = radius-v.magnitude;
-		//Debug.Log("height: "+height);
-		//Debug.Log("floor: "+floor);
-		if (floor.x<floor.y && floor.x<floor.z)
-			v = floor+(height*Vector3.right);
-		else if (floor.y<floor.z)
-			v = floor+(height*Vector3.forward);
-		else
-			v = floor+(height*Vector3.up);
+			// return floor + the appropriate height
+			float height = radius-v.magnitude;
+			if (floor.x<floor.y && floor.x<floor.z)
+				v = floor+(height*Vector3.right);
+			else if (floor.y<floor.z)
+				v = floor+(height*Vector3.forward);
+			else
+				v = floor+(height*Vector3.up);
+		} else
+			v /= cellDist;
 		return v;
 	}
 
@@ -304,12 +325,17 @@ public class MazeStructure {
 			for (int j=0; j<5; ++j)
 				for (int k=0; k<5; ++k)
 					visited[i, j, k] = false;*/
+
 		int count=0;
+		int yStart=(is3D?0:1);
+		int yEnd = (is3D?3:2);
+		int sideStart=1;
+		int sideEnd = (is3D?data.GetLength(0):2);
 
 		// iterate over {x, y, z}
-		for (int yIndex=0; yIndex<3; ++yIndex) {
+		for (int yIndex=yStart; yIndex<yEnd; ++yIndex) {
 			// iterate over both sides of the given axis
-			for (int side=1; side<data.GetLength(yIndex); side+=data.GetLength(yIndex)-3) {
+			for (int side=sideStart; side<sideEnd; side+=data.GetLength(yIndex)-3) {
 				// create the parent object
 				GameObject parent = new GameObject("side");
 				parent.transform.parent = container.transform;
@@ -331,7 +357,7 @@ public class MazeStructure {
 							continue;
 						visited[p.x, p.y, p.z] = true;
 						// error if the loop goes bad
-						if (++count>1000)
+						if (++count>5000)
 							throw new Exception("count>1000");
 
 						result[(p.x+1)/2, (p.y+1)/2, (p.z+1)/2] = MakeMazeCell(p, parent);
@@ -346,10 +372,10 @@ public class MazeStructure {
 	private MazeCell MakeMazeCell(Point3 p, GameObject parent) {
 		// find variables
 		int yIndex;
-		if (p.x==1||p.x==data.GetLength(0)-2)
-			yIndex = 0;
-		else if (p.y==1||p.y==data.GetLength(1)-2)
+		if (p.y==1||p.y==data.GetLength(1)-2)
 			yIndex = 1;
+		else if (p.x==1||p.x==data.GetLength(0)-2)
+			yIndex = 0;
 		else if (p.z==1||p.z==data.GetLength(2)-2)
 			yIndex = 2;
 		else
@@ -361,13 +387,13 @@ public class MazeStructure {
 		int j = p[zIndex];
 
 		// create a vector space
-		MazeCell.VectorSpaceish v = new MazeCell.VectorSpaceish();
-		v.AddAll((p-1).ToVector3()/2);
-		v.AddAll((side==1?(side-1)/2:(side+1)/2) - (p[yIndex]-1)/2f, yIndex);
-		v.AddX1(1, xIndex);
+		MazeCell.SquareTransformer sq = new MazeCell.SquareTransformer();
+		sq.AddAll((p-1).ToVector3()/2);
+		sq.AddAll((side==1?(side-1)/2:(side+1)/2) - (p[yIndex]-1)/2f, yIndex);
+		sq.AddX1(1, xIndex);
 		int yDiff = (side==1?1:-1);
-		v.vy[yIndex] = yDiff;
-		v.AddZ1(1, zIndex);
+		sq.vy[yIndex] = yDiff;
+		sq.AddZ1(1, zIndex);
 
 		// find cellWallIndex using a 2D point space
 		int cellWallIndex=0;
@@ -385,55 +411,55 @@ public class MazeStructure {
 		cellWallIndex += ValidMove(p, p-forward)?0:1;
 
 		// if the cell is on an edge, modify the vector space and cellWallIndex
-		if ((i==1||i==data.GetLength((yIndex+1)%3)-2) || (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+		if (is3D && ((i==1||i==data.GetLength((yIndex+1)%3)-2) || (j==1||j==data.GetLength((yIndex+2)%3)-2))) {
 			// modify the vector space and cellWallIndex
 			if (i==1) {
-				v.AddX0(yDiff, yIndex);
-				v.vy[xIndex] = 1;
+				sq.AddX0(yDiff, yIndex);
+				sq.vy[xIndex] = 1;
 				cellWallIndex -= ValidMove(p, p+up)?2:0;
 				cellWallIndex -= ValidMove(p, p-up)?2:0;
 			} else if (i==data.GetLength((yIndex+1)%3)-2) {
-				v.AddX1(yDiff, yIndex);
-				v.vy[xIndex] = -1;
+				sq.AddX1(yDiff, yIndex);
+				sq.vy[xIndex] = -1;
 				cellWallIndex -= ValidMove(p, p+up)?8:0;
 				cellWallIndex -= ValidMove(p, p-up)?8:0;
 			} else if (j==1) {
-				v.AddZ0(yDiff, yIndex);
-				v.vy[zIndex] = 1;
+				sq.AddZ0(yDiff, yIndex);
+				sq.vy[zIndex] = 1;
 				cellWallIndex -= ValidMove(p, p+up)?1:0;
 				cellWallIndex -= ValidMove(p, p-up)?1:0;
 			} else if (j==data.GetLength((yIndex+1)%3)-2) {
-				v.AddZ1(yDiff, yIndex);
-				v.vy[zIndex] = -1;
+				sq.AddZ1(yDiff, yIndex);
+				sq.vy[zIndex] = -1;
 				cellWallIndex -= ValidMove(p, p+up)?4:0;
 				cellWallIndex -= ValidMove(p, p-up)?4:0;
 			}
-			v.vy.Normalize();
+			sq.vy.Normalize();
 
 			// calculate the index of cellWalls and cellWallTops to use
 		}
 
 		// if the cell is on a corner, corner vector space
-		if ((i==1||i==data.GetLength((yIndex+1)%3)-2) && (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
+		if (is3D && (i==1||i==data.GetLength((yIndex+1)%3)-2) && (j==1||j==data.GetLength((yIndex+2)%3)-2)) {
 			// modify the vector space
 			if (i==1 && j==1) {
-				v.v10[yIndex] += yDiff;
-				v.v00[xIndex] += 1;
-				v.vy[zIndex] = v.vy[xIndex];
+				sq.v10[yIndex] += yDiff;
+				sq.v00[xIndex] += 1;
+				sq.vy[zIndex] = sq.vy[xIndex];
 			} else if (i==1 && j==data.GetLength((yIndex+2)%3)-2) {
-				v.v11[yIndex] += yDiff;
-				v.v01[xIndex] += 1;
-				v.vy[zIndex] = -v.vy[xIndex];
+				sq.v11[yIndex] += yDiff;
+				sq.v01[xIndex] += 1;
+				sq.vy[zIndex] = -sq.vy[xIndex];
 			} else if (i==data.GetLength((yIndex+1)%3)-2 && j==1) {
-				v.v00[yIndex] += yDiff;
-				v.v10[xIndex] -= 1;
-				v.vy[zIndex] = -v.vy[xIndex];
+				sq.v00[yIndex] += yDiff;
+				sq.v10[xIndex] -= 1;
+				sq.vy[zIndex] = -sq.vy[xIndex];
 			} else {
-				v.v01[yIndex] += yDiff;
-				v.v11[xIndex] -= 1;
-				v.vy[zIndex] = v.vy[xIndex];
+				sq.v01[yIndex] += yDiff;
+				sq.v11[xIndex] -= 1;
+				sq.vy[zIndex] = sq.vy[xIndex];
 			}
-			v.vy.Normalize();
+			sq.vy.Normalize();
 
 			// calculate the index of cellWalls and cellWallTops to use
 		}
@@ -441,9 +467,10 @@ public class MazeStructure {
 		// create the MazeCell
 		MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();
 		cell.transform.parent = parent.transform;
-		//Debug.Log("cellWallIndex: "+cellWallIndex);
+		GameObject torch = (torches.ContainsKey(p)?this.torch:null);
+		Point3 torchSide = (torch==null?Point3.zero:torches[p]-p);
 		cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
-			cellWallTopMat, v);
+			cellWallTopMat, sq, torch, torchSide);
 		return cell;
 	}
 
