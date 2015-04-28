@@ -33,50 +33,48 @@ public class MazeGame:MonoBehaviour {
 	public bool is3D=true;
 	public bool isScary=true;
 	public Key key;
-	public GameObject door;
 	//private GameObject player_collider;
 	public MazeStructure mazeStruct;
 	public GameObject left_cam;
 	public GameObject right_cam;
 	public AnimationCurve lightFlicker;
 	public Monster monster;
-	public GameObject torch;
+	public GameObject torchObj;
+	public GameObject doorObj;
 	private MazeCell[, ,] cells;
 	private GameObject mazeSphere;
 	public Light cLight;
 	public AudioClip lightsOutInit;
 	public AudioClip lightOff;
-	private Rigidbody playerRigid;
+	private Main main;
 
 	public Lamp lamp;
 	private GameObject lantern;
 
-	public void PressButton() {
-		print("button pressed!");
-	}
+	public void Init(Main main) {
+		this.main = main;
 
-	// Use this for initialization
-	void Start() {
-		// initialize all MazeTools
-		MazeTool[] tools = { top, bottom, left, right, back, front };
+		// initialize all MazeTools (from prefabs)
+		MazeTool[] tools = { top, bottom, left, right, front, back };
 		for (int i=0; i<tools.Length; i++) {
+			tools[i] = (MazeTool)Instantiate(tools[i]);
 			tools[i].Start();
 			tools[i].gameObject.SetActive(false);
 		}
 
 		
 		// initialize the MazeStructure
-		mazeStruct = new MazeStructure(top, bottom, left, right, front, back, radius, is3D, torch);
+		mazeStruct = new MazeStructure(tools[0], tools[1], tools[2], tools[3], tools[4], tools[5], radius, is3D, torchObj);
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
-			cellFloorMat, cellWallMat, cellWallTopMat, lightFlicker, radius);
+			cellFloorMat, cellWallMat, cellWallTopMat, doorObj, lightFlicker, radius);
 
 		// initialize this
 		transform.position = mazeStruct.GetStartSphere();
 		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
 		skyboxMaterial.SetColor("_Tint", new Color32((byte)128, (byte)128, (byte)128, (byte)128));
 		GetComponent<OVRCameraRig>().Init();
-		this.playerRigid = gameObject.AddComponent<Rigidbody>();
-		this.playerRigid.freezeRotation = true;
+		Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
+		rigidbody.freezeRotation = true;
 		Physics.gravity = Vector3.zero;
 		SphereCollider collider = gameObject.AddComponent<SphereCollider>();
 		collider.material = (PhysicMaterial)Resources.Load("WallPhysics", typeof(PhysicMaterial));
@@ -111,6 +109,11 @@ public class MazeGame:MonoBehaviour {
 	}
 
 	void FixedUpdate() {
+		if (rigidbody==null) {
+			print("unity hasn't set the rigidbody yet");
+			return;
+		}
+
 		if (is3D) {
 			// calculate up, forwards and right
 			Vector3 up = -transform.position.normalized;
@@ -136,8 +139,8 @@ public class MazeGame:MonoBehaviour {
 			// calculate where to move, then move
 			Vector3 dest = transform.position + (forward*forwards).normalized
 				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
-			this.playerRigid.MovePosition(this.playerRigid.position.normalized*(radius-playerHeight));
-			this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+			rigidbody.MovePosition(rigidbody.position.normalized*(radius-playerHeight));
+			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
 			transform.localRotation = Quaternion.LookRotation(forwards, up);
 		} // if 2D
 		else {
@@ -164,15 +167,12 @@ public class MazeGame:MonoBehaviour {
 
 			Vector3 dest = transform.position + (forward*forwards).normalized
 				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
-			Vector3 v = playerRigid.position;
+			Vector3 v = rigidbody.position;
 			v[1] = playerHeight;
-			this.playerRigid.MovePosition(v);
-			this.playerRigid.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+			rigidbody.MovePosition(v);
+			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
 			transform.localRotation = Quaternion.LookRotation(forwards, up);
 		}
-
-if (Input.GetKeyDown(KeyCode.Space))
-	GetComponent<OVRManager>().enabled = !GetComponent<OVRManager>().enabled;
 	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
@@ -188,11 +188,8 @@ if (Input.GetKeyDown(KeyCode.Space))
 			lights.keyTime = 0;
 			//print(skyboxMaterial.GetColor("_Tint"));
 			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
-			//gameObject.GetComponent<OVRPlayerController>().Acceleration = 0.3f;
-			//gameObject.GetComponentInChildren<Light>().enabled = true;
-			//gameObject.GetComponentInChildren<LightFlicker>().enabled = true;
 			this.lamp.gameObject.SetActive(true);
-			monster.Init(mazeStruct, cells, transform, mazeStruct.GetStartSphere(), monsterSpeed, monsterHeight);
+			monster.Init(main, mazeStruct, cells, transform, mazeStruct.GetMonsterSphere(), monsterSpeed, monsterHeight, is3D);
 
 			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 			sphere.transform.localScale = new Vector3(96.8f, 96.8f, 96.8f);
@@ -217,5 +214,9 @@ if (Input.GetKeyDown(KeyCode.Space))
 			}
 		}
 
+		if (collider.name=="EndZone") {
+			main.LevelEndMenu(true);
+			Destroy(gameObject);
+		}
 	}
 }

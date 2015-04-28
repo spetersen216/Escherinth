@@ -13,34 +13,66 @@ public class MazeCell:MonoBehaviour {
 	/// <summary>
 	/// Initializes the MazeCell. pos is in data-space.
 	/// </summary>
-	public void Init(MazeStructure mazeStruct, Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop, Material cellFloorMat, Material cellWallMat,
-		Material cellWallTopMat, SquareTransformer vectors, GameObject torch, Point3 torchSide) {
+	public void Init(MazeStructure mazeStruct, Point3 pos, Mesh cellFloor, Mesh cellWall, Mesh cellWallTop,
+		SquareTransformer vectors, Point3 torchSide, Point3 doorSide, bool end) {
 
 		// create cell floor
 		floor = new GameObject("floor - "+cellFloor.name);
 		floor.AddComponent<MeshFilter>().mesh = Morph(cellFloor, mazeStruct, vectors, false);
-		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellFloorMat);
+		floor.AddComponent<MeshRenderer>().material = (Material)Instantiate(mazeStruct.cellFloorMat);
 		floor.transform.parent = transform;
 
 		// create cell wall
 		wall = new GameObject("cell wall - "+cellWall.name);
 		wall.AddComponent<MeshFilter>().mesh = Morph(cellWall, mazeStruct, vectors, true);
 		wall.AddComponent<MeshCollider>().sharedMesh = wall.GetComponent<MeshFilter>().mesh;
-		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallMat);
+		wall.AddComponent<MeshRenderer>().material = (Material)Instantiate(mazeStruct.cellWallMat);
 		wall.transform.parent = transform;
 
 		// create cell wall top
 		wallTop = new GameObject("cell wall top - "+cellWallTop.name);
 		wallTop.AddComponent<MeshFilter>().mesh = Morph(cellWallTop, mazeStruct, vectors, true);
-		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(cellWallTopMat);
+		wallTop.AddComponent<MeshRenderer>().material = (Material)Instantiate(mazeStruct.cellWallTopMat);
 		wallTop.transform.parent = transform;
 
 		plane = new Plane(vectors.vy, vectors.v00);
 		children = new GameObject[] { floor, wall, wallTop };
 
 		// place torch
-		if (torch!=null) {
+		if (torchSide!=Point3.zero) {
+			print("making torch");
+			torch = (GameObject)Instantiate(mazeStruct.torchObj);
+			Vector3 floorv = vectors.Translate((Vector3.one+torchSide.ToVector3())/2, false);
+			torch.transform.parent = transform;
+			torch.transform.position =
+				mazeStruct.Vector3FromCubeToSphere(vectors.Translate((Vector3.one+torchSide.ToVector3())/2, true));
+			floorv = vectors.Translate(Vector3.one/2, false);
+			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true));
 
+			// rotate the torch
+			Vector3 up = -torch.transform.position.normalized;
+			Vector3 forward = (v-torch.transform.position).normalized;
+			if (Vector3.Angle(forward, up)<90)
+				forward = Vector3.RotateTowards(-up, forward, Mathf.PI/2, 0);
+			else
+				forward = Vector3.RotateTowards(up, forward, Mathf.PI/2, 0);
+			torch.transform.rotation = Quaternion.LookRotation(forward, up);
+		}
+
+		// place door
+		if (doorSide!=Point3.zero) {
+
+		}
+
+		// place endZone
+		if (end) {
+			GameObject endZone = new GameObject("EndZone");
+			endZone.transform.parent = transform;
+			BoxCollider box = endZone.AddComponent<BoxCollider>();
+			box.size = Vector3.one*mazeStruct.cellDist;
+			Vector3 floorv = vectors.Translate(Vector3.one/2, false);
+			box.center = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true), floorv);
+			box.isTrigger = true;
 		}
 	}
 

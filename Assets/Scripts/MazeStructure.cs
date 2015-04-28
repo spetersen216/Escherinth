@@ -10,25 +10,26 @@ public class MazeStructure {
 	public int length;
 	public float radius;
 	public bool is3D;
-	private float cellDist;
+	public float cellDist;
 
 	private Point3 key;
 	private Point3 door;
 	private Point3 startPos;
 	private Point3 monsterPos;
+	private Point3 endPos;
 	private Dictionary<Point3, Point3> torches=new Dictionary<Point3, Point3>();
-	private GameObject doorObj;
-	private GameObject torch;
 
-	Mesh floor;
-	Mesh[] cellWalls;
-	Mesh[] cellWallTops;
-	Material cellFloorMat;
-	Material cellWallMat;
-	Material cellWallTopMat;
+	public Mesh floor;
+	public Mesh[] cellWalls;
+	public Mesh[] cellWallTops;
+	public Material cellFloorMat;
+	public Material cellWallMat;
+	public Material cellWallTopMat;
+	public GameObject doorObj;
+	public GameObject torchObj;
 
 	public MazeStructure(MazeTool top, MazeTool bottom, MazeTool left, MazeTool right, MazeTool front, MazeTool back,
-		float radius, bool is3D, GameObject torch) {
+		float radius, bool is3D, GameObject torchObj) {
 
 		// verify that MazeTools have the same dimensions
 		length = bottom.walls.GetLength(0);
@@ -50,7 +51,7 @@ public class MazeStructure {
 		this.radius = radius;
 		this.is3D = is3D;
 		this.mazeTool = top;
-		this.torch = torch;
+		this.torchObj = torchObj;
 		cellDist = 2*radius/length;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)
@@ -68,7 +69,7 @@ public class MazeStructure {
 			ParseMazeTool(front, (i, j) => new Point3(high-i, j+1, 1));
 			ParseMazeTool(back, (i, j) => new Point3(i+1, j+1, high));
 		}
-		Debug.Log("key: "+key+"; start: "+startPos+"; monster: "+monsterPos+"; door: "+door);
+		Debug.Log("key: "+key+"; start: "+startPos+"; monster: "+monsterPos+"; door: "+door+"; end: "+endPos);
 	}
 
 	/// <summary>
@@ -109,6 +110,10 @@ public class MazeStructure {
 						for (int k=0; k<4; ++k)
 							if (maze.walls[neighbors[k].x, neighbors[k].y].type==MazeToolWall.WallType.torch)
 								torches[pos] = translate(neighbors[k].x, neighbors[k].y);
+						Debug.Log("new torch entry "+torches[pos]+" at "+pos);
+						break;
+					case MazeToolCell.CellType.end:
+						endPos = pos;
 						break;
 					}
 				}
@@ -161,6 +166,21 @@ public class MazeStructure {
 	/// </summary>
 	public Point3[] GetStart() {
 		return Point3FromDataToGame(startPos);
+	}
+
+	/// <summary>
+	/// Returns the sphere-space start location.
+	/// </summary>
+	public Vector3 GetMonsterSphere() {
+		Vector3 v = FromGameToCube(Point3FromDataToGame(monsterPos)[0]);
+		return Vector3FromCubeToSphere(v);
+	}
+
+	/// <summary>
+	/// Returns the game-space start location.
+	/// </summary>
+	public Point3[] GetMonster() {
+		return Point3FromDataToGame(monsterPos);
 	}
 
 	/// <summary>
@@ -303,7 +323,7 @@ public class MazeStructure {
 	/// Returns a 3D array of MazeCells that create a sphere, with indexes in game-space.
 	/// </summary>
 	public MazeCell[, ,] MakeCells(Mesh floor, Mesh[] cellWalls, Mesh[] cellWallTops, Material cellFloorMat,
-		Material cellWallMat, Material cellWallTopMat, AnimationCurve flicker, float radius) {
+		Material cellWallMat, Material cellWallTopMat, GameObject doorObj, AnimationCurve flicker, float radius) {
 
 		// store variables
 		this.floor = floor;
@@ -312,6 +332,7 @@ public class MazeStructure {
 		this.cellFloorMat = cellFloorMat;
 		this.cellWallMat = cellWallMat;
 		this.cellWallTopMat = cellWallTopMat;
+		this.doorObj = doorObj;
 
 		GameObject container = new GameObject("Maze-Sphere Container");
 		MazeCell[, ,] result = new MazeCell[(data.GetLength(0)+1)/2, (data.GetLength(1)+1)/2, (data.GetLength(2)+1)/2];
@@ -464,13 +485,24 @@ public class MazeStructure {
 			// calculate the index of cellWalls and cellWallTops to use
 		}
 
+		// handle door
+		Point3 doorSide = Point3.zero;
+		Point3[] gpts = Point3FromDataToGame(door);
+		Point3[] dpts = new Point3[2];
+		dpts[0] = Point3FromGameToData(new Point3[]{gpts[0]});
+		dpts[1] = Point3FromGameToData(new Point3[]{gpts[1]});
+		if (p==dpts[0] || p==dpts[1])
+			doorSide = (dpts[0]+dpts[1])/2 - p;
+
+		// handle torch
+		Point3 torchSide = (torches.ContainsKey(p)?torches[p]-p:Point3.zero);
+		if (torches.ContainsKey(p))
+			Debug.Log("torch at "+p+" is "+torches[p]);
+
 		// create the MazeCell
 		MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();
 		cell.transform.parent = parent.transform;
-		GameObject torch = (torches.ContainsKey(p)?this.torch:null);
-		Point3 torchSide = (torch==null?Point3.zero:torches[p]-p);
-		cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], cellFloorMat, cellWallMat,
-			cellWallTopMat, sq, torch, torchSide);
+		cell.Init(this, p, floor, cellWalls[cellWallIndex], cellWallTops[cellWallIndex], sq, torchSide, doorSide, p==endPos);
 		return cell;
 	}
 

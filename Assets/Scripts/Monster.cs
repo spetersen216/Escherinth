@@ -12,6 +12,8 @@ public class Monster:MonoBehaviour {
 	public float distance=0;
 	private float speed;
 	private float height;
+	private Main main;
+	private bool is3D;
 
 	// sound variables
 	public AudioSource sounds;
@@ -24,15 +26,15 @@ public class Monster:MonoBehaviour {
 	public bool wasInSight=false;
 	public float timeSinceSight;
 
-	public void Init(MazeStructure mazeStruct, MazeCell[, ,] cells, Transform player, Vector3 startPos, float speed, float height) {
+	public void Init(Main main, MazeStructure mazeStruct, MazeCell[, ,] cells, Transform player, Vector3 startPos, float speed, float height, bool is3D) {
+		this.main = main;
 		this.player = player;
 		this.mazeStruct = mazeStruct;
 		this.speed = speed;
 		this.height = height;
+		this.is3D = is3D;
 		transform.position = startPos;
 		sounds = player.gameObject.AddComponent<AudioSource>();
-		sightEstab = Resources.LoadAssetAtPath<AudioClip>("Assets/Sounds/grudge-sound.wav");
-		sightLost = Resources.LoadAssetAtPath<AudioClip>("Assets/Sounds/SuspensefulViolinPopcorn.wav");
 		gameObject.SetActive(true);
 		mesh = GetComponent<MeshFilter>().mesh;
 		print("monster start pos: "+startPos);
@@ -67,8 +69,10 @@ public class Monster:MonoBehaviour {
 
 		// if the monster and player are in the same cell
 		if (((int)distance)+1>path.Length) {
-			if (!Application.isLoadingLevel)
-				Application.LoadLevel(Application.loadedLevelName);
+			print("monster hit");
+			main.LevelEndMenu(false);
+			Destroy(player.gameObject);
+			Destroy(gameObject);
 			return;
 		}
 
@@ -110,7 +114,7 @@ public class Monster:MonoBehaviour {
 		transform.position = ((1 - weight) * positions[lower] + weight * positions[higher]);
 
 		// rotate the monster
-		Vector3 up = -transform.position.normalized;
+		Vector3 up = (is3D?-transform.position.normalized:Vector3.up);
 		Vector3 forward = positions[higher]-positions[lower];
 		transform.rotation = Quaternion.LookRotation(forward, up);
 
@@ -159,7 +163,11 @@ public class Monster:MonoBehaviour {
 		for (int i=0; i<positions.Length; ++i) {
 			Point3 p = path[i];
 			Vector3 v = mazeStruct.FromGameToCube(p);
-			positions[i] = mazeStruct.Vector3FromCubeToSphere(v).normalized*(mazeStruct.radius-height);
+			if (is3D)
+				positions[i] = mazeStruct.Vector3FromCubeToSphere(v).normalized*(mazeStruct.radius-height);
+			else {
+				v = mazeStruct.Vector3FromCubeToSphere(v)*(mazeStruct.radius-height);
+			}
 		}
 	}
 

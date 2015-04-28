@@ -6,7 +6,7 @@ using System;
 public class MazeToolCell:MazeToolComponent {
 
 	private string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	public enum CellType {normal, key, startPos, monsterPos, torch};
+	public enum CellType {normal, key, startPos, monsterPos, torch, end};
 	public CellType type;
 	private CellType last;
 
@@ -55,6 +55,9 @@ public class MazeToolCell:MazeToolComponent {
 			break;
 		case CellType.torch:
 			Gizmos.DrawIcon(transform.position, "torch.png", scaleGizmoIcon);
+			break;
+		case CellType.end:
+			Gizmos.DrawIcon(transform.position, "end.png", scaleGizmoIcon);
 			break;
 		default:
 			break;
