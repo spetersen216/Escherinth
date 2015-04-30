@@ -114,106 +114,46 @@ public class MazeGame:MonoBehaviour {
 			return;
 		}
 
-		if (is3D) {
-			// calculate up, forwards and right
-			Vector3 up = -transform.position.normalized;
-			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-			if (Vector3.Angle(up, forwards)<90) {
-				forwards = Vector3.RotateTowards(-up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-				Debug.Log("recalc forwards");
-			}
-			Vector3 right = Vector3.Cross(forwards, up).normalized;
-
-			// handle left-right camera movement (from keyboard)
-			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
-			right = Vector3.Cross(forwards, up).normalized;
-
-			// sum the WASD/Arrows movement
-			float forward = 0;
-			if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
-				forward += 1;
-			if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-				forward -= 1;
-
-			// calculate where to move, then move
-			Vector3 dest = transform.position + (forward*forwards).normalized
-				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
+		// freeze position to 2D plane OR 3D sphere
+		if (is3D)
 			rigidbody.MovePosition(rigidbody.position.normalized*(radius-playerHeight));
-			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-
-			// apply rotation
-			up = -transform.position.normalized;
-			forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
-			if (Vector3.Angle(up, forwards)<90)
-				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
-			right = Vector3.Cross(forwards, up).normalized;
-			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
-			right = Vector3.Cross(forwards, up).normalized;
-			transform.localRotation = Quaternion.LookRotation(forwards, up);
-		} // if 2D
 		else {
-			// calculate up, forwards and right
-			Vector3 up = Vector3.up;
-			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-			if (Vector3.Angle(up, forwards)<90)
-				forwards = Vector3.RotateTowards(-up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-			Vector3 right = Vector3.Cross(forwards, up).normalized;
-
-			// handle left-right camera movement (from keyboard)
-			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
-			right = Vector3.Cross(forwards, up).normalized;
-
-			// sum the WASD/Arrows movement
-			float forward = 0;
-			if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
-				forward += 1;
-			if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-				forward -= 1;
-
-			Vector3 dest = transform.position + (forward*forwards).normalized
-				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
 			Vector3 v = rigidbody.position;
 			v[1] = playerHeight;
 			rigidbody.MovePosition(v);
-			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
-
-			// apply rotation
-			up = Vector3.up;
-			forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
-			if (Vector3.Angle(up, forwards)<90)
-				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
-			right = Vector3.Cross(forwards, up).normalized;
-			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
-			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
-			right = Vector3.Cross(forwards, up).normalized;
-			transform.localRotation = Quaternion.LookRotation(forwards, up);
-			
 		}
+
+		// sum the forward/backward movement
+		float forward = 0;
+		if (Input.GetKey(KeyCode.W)  || Input.GetKey(KeyCode.UpArrow))
+			forward += 1;
+		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+			forward -= 1;
+
+		// calculate where to move, then move
+		Vector3 dest = transform.position + (forward*Forwards(transform.Find("LeftEyeAnchor"))).normalized
+				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
+		rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+		transform.localRotation = Quaternion.LookRotation(Forwards(transform), Up());
 	}
 
-	/*private Vector3 Up() {
+	private Vector3 Up() {
 		return (is3D?-transform.position:Vector3.up);
 	}
-	private Vector3 Forwards(Transform target, Vector3 up) {
+	private Vector3 Forwards(Transform target) {
+		Vector3 up = Up();
 		Vector3 forwards = Vector3.RotateTowards(up, target.forward, Mathf.PI/2, 1).normalized;
 		if (Vector3.Angle(up, forwards)<90)
 			forwards = Vector3.RotateTowards(-up, target.forward, Mathf.PI/2, 1).normalized;
+		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+			forwards = Vector3.RotateTowards(forwards, -Right(up, forwards), 6*Time.fixedDeltaTime, 1);
+		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+			forwards = Vector3.RotateTowards(forwards, Right(up, forwards), 6*Time.fixedDeltaTime, 1);
 		return forwards;
 	}
 	private Vector3 Right(Vector3 up, Vector3 forwards) {
 		return Vector3.Cross(forwards, up).normalized;
-	}*/
+	}
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
 	void OnTriggerEnter(Collider collider) {
