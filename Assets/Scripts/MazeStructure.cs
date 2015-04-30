@@ -52,6 +52,7 @@ public class MazeStructure {
 		this.is3D = is3D;
 		this.mazeTool = top;
 		this.torchObj = torchObj;
+		if (this.torchObj==null) throw new Exception("torchobj==null");
 		cellDist = 2*radius/length;
 		data = new bool[2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(0), 2+mazeTool.walls.GetLength(1)];
 		for (int i=0; i<data.GetLength(0); ++i)

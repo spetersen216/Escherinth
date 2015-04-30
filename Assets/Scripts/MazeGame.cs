@@ -118,8 +118,10 @@ public class MazeGame:MonoBehaviour {
 			// calculate up, forwards and right
 			Vector3 up = -transform.position.normalized;
 			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
-			if (Vector3.Angle(up, forwards)<90)
-				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+			if (Vector3.Angle(up, forwards)<90) {
+				forwards = Vector3.RotateTowards(-up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
+				Debug.Log("recalc forwards");
+			}
 			Vector3 right = Vector3.Cross(forwards, up).normalized;
 
 			// handle left-right camera movement (from keyboard)
@@ -141,6 +143,18 @@ public class MazeGame:MonoBehaviour {
 				*(Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift)?playerRunSpeed:playerSpeed);
 			rigidbody.MovePosition(rigidbody.position.normalized*(radius-playerHeight));
 			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+
+			// apply rotation
+			up = -transform.position.normalized;
+			forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
+			if (Vector3.Angle(up, forwards)<90)
+				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+			right = Vector3.Cross(forwards, up).normalized;
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
+			right = Vector3.Cross(forwards, up).normalized;
 			transform.localRotation = Quaternion.LookRotation(forwards, up);
 		} // if 2D
 		else {
@@ -148,7 +162,7 @@ public class MazeGame:MonoBehaviour {
 			Vector3 up = Vector3.up;
 			Vector3 forwards = Vector3.RotateTowards(up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
 			if (Vector3.Angle(up, forwards)<90)
-				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+				forwards = Vector3.RotateTowards(-up, transform.Find("LeftEyeAnchor").forward, Mathf.PI/2, 1).normalized;
 			Vector3 right = Vector3.Cross(forwards, up).normalized;
 
 			// handle left-right camera movement (from keyboard)
@@ -171,9 +185,35 @@ public class MazeGame:MonoBehaviour {
 			v[1] = playerHeight;
 			rigidbody.MovePosition(v);
 			rigidbody.velocity = (dest-transform.position)/Time.fixedDeltaTime;
+
+			// apply rotation
+			up = Vector3.up;
+			forwards = Vector3.RotateTowards(up, transform.forward, Mathf.PI/2, 1).normalized;
+			if (Vector3.Angle(up, forwards)<90)
+				forwards = Vector3.RotateTowards(-up, transform.forward, Mathf.PI/2, 1).normalized;
+			right = Vector3.Cross(forwards, up).normalized;
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				forwards = Vector3.RotateTowards(forwards, -right, 6*Time.fixedDeltaTime, 1);
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				forwards = Vector3.RotateTowards(forwards, right, 6*Time.fixedDeltaTime, 1);
+			right = Vector3.Cross(forwards, up).normalized;
 			transform.localRotation = Quaternion.LookRotation(forwards, up);
+			
 		}
 	}
+
+	/*private Vector3 Up() {
+		return (is3D?-transform.position:Vector3.up);
+	}
+	private Vector3 Forwards(Transform target, Vector3 up) {
+		Vector3 forwards = Vector3.RotateTowards(up, target.forward, Mathf.PI/2, 1).normalized;
+		if (Vector3.Angle(up, forwards)<90)
+			forwards = Vector3.RotateTowards(-up, target.forward, Mathf.PI/2, 1).normalized;
+		return forwards;
+	}
+	private Vector3 Right(Vector3 up, Vector3 forwards) {
+		return Vector3.Cross(forwards, up).normalized;
+	}*/
 
 	// The OnTriggerEnter function is called when the collider attached to this game object (whatever object the script is attached to) overlaps another collider set to be a "trigger"
 	void OnTriggerEnter(Collider collider) {
@@ -214,9 +254,10 @@ public class MazeGame:MonoBehaviour {
 			}
 		}
 
-		if (collider.name=="EndZone") {
+		/*if (collider.name=="EndZone") {
 			main.LevelEndMenu(true);
+			print("destroying");
 			Destroy(gameObject);
-		}
+		}*/
 	}
 }

@@ -37,9 +37,7 @@ public class Main : MonoBehaviour {
 		tmp.sizeDelta = new Vector2(20, Screen.height);
 
 		// initialize menus
-		Play();
-		
-		/*
+		//Play();
 		MainMenu();
 		RectTransform template = (RectTransform)levelSelect.transform.Find("Template");
 		RectTransform scrollArea = (RectTransform)levelSelect.transform.Find("ScrollArea");

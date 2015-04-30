@@ -39,18 +39,20 @@ public class MazeCell:MonoBehaviour {
 		children = new GameObject[] { floor, wall, wallTop };
 
 		// place torch
-		if (torchSide!=Point3.zero) {
+		/*if (torchSide!=Point3.zero) {
+			print("torchside: "+torchSide);
 			print("making torch");
 			torch = (GameObject)Instantiate(mazeStruct.torchObj);
+			torch.transform.localScale = torch.transform.localScale*mazeStruct.cellDist;
 			Vector3 floorv = vectors.Translate((Vector3.one+torchSide.ToVector3())/2, false);
 			torch.transform.parent = transform;
 			torch.transform.position =
-				mazeStruct.Vector3FromCubeToSphere(vectors.Translate((Vector3.one+torchSide.ToVector3())/2, true));
+				mazeStruct.Vector3FromCubeToSphere(vectors.Translate((Vector3.one+torchSide.ToVector3())/2, true), floorv);
 			floorv = vectors.Translate(Vector3.one/2, false);
-			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true));
+			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true), floorv);
 
 			// rotate the torch
-			Vector3 up = -torch.transform.position.normalized;
+			Vector3 up = (mazeStruct.is3D?-torch.transform.position.normalized:Vector3.up);
 			Vector3 forward = (v-torch.transform.position).normalized;
 			if (Vector3.Angle(forward, up)<90)
 				forward = Vector3.RotateTowards(-up, forward, Mathf.PI/2, 0);
@@ -62,7 +64,7 @@ public class MazeCell:MonoBehaviour {
 		// place door
 		if (doorSide!=Point3.zero) {
 
-		}
+		}*/
 
 		// place endZone
 		if (end) {
