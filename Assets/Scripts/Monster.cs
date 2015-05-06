@@ -47,8 +47,8 @@ public class Monster:MonoBehaviour {
 			isStarting = false;
 
 		// find player and monster positions
-		Vector3 playerV = mazeStruct.Vector3FromSphereToCube(player.position.normalized*mazeStruct.radius);
-		Vector3 monsterV = mazeStruct.Vector3FromSphereToCube(transform.position.normalized*mazeStruct.radius);
+		Vector3 playerV = mazeStruct.Vector3FromSphereToCube(is3D?player.position.normalized*mazeStruct.radius:player.position);
+		Vector3 monsterV = mazeStruct.Vector3FromSphereToCube(is3D?transform.position.normalized*mazeStruct.radius:transform.position);
 		Point3 playerPos = mazeStruct.FromCubeToGame(playerV);
 		Point3 monsterPos = mazeStruct.FromCubeToGame(monsterV);
 
@@ -58,19 +58,26 @@ public class Monster:MonoBehaviour {
 
 			// insert 2 positions in front to make the monster rise
 			Vector3[] temp = new Vector3[positions.Length+2];
-			for (int i=0; i<positions.Length; ++i)
+			Point3[] temp2 = new Point3[path.Length+2];
+			temp2[0] = temp2[1] = new Point3(-1, -1, -1);
+			for (int i=0; i<positions.Length; ++i) {
 				temp[i+2] = positions[i];
-			for (int i=1; i>=0; --i)
-				temp[i] = temp[i+1].normalized*(temp[i+1].magnitude+2*mazeStruct.radius/mazeStruct.length);
-			temp[0] = temp[2].normalized*(temp[2].magnitude+2);
-			temp[1] = temp[2].normalized*(temp[2].magnitude+1);
+				temp2[i+2] = path[i];
+			}
+			if (is3D) {
+				temp[0] = temp[2].normalized*(temp[2].magnitude+2);
+				temp[1] = temp[2].normalized*(temp[2].magnitude+1);
+			} else {
+				temp[0] = temp[2]-2*Vector3.up;
+				temp[1] = temp[2]-1*Vector3.up;
+			}
 			positions = temp;
 		}
 
 		// if the monster and player are in the same cell
 		if (((int)distance)+1>path.Length) {
 			print("monster hit");
-			main.LevelEndMenu(false);
+			main.Show(()=>main.LevelEndMenu(false));
 			Destroy(player.gameObject);
 			Destroy(gameObject);
 			return;
@@ -115,7 +122,8 @@ public class Monster:MonoBehaviour {
 
 		// rotate the monster
 		Vector3 up = (is3D?-transform.position.normalized:Vector3.up);
-		Vector3 forward = positions[higher]-positions[lower];
+		//Vector3 forward = positions[higher]-positions[lower];
+		Vector3 forward = player.position-transform.position;
 		transform.rotation = Quaternion.LookRotation(forward, up);
 
 		// handle sight of the player
@@ -154,20 +162,16 @@ public class Monster:MonoBehaviour {
 		print("monsterPos: "+monsterPos);
 		Pathfinding pathfinding = mazeStruct.Pathfind(monsterPos);
 		path = pathfinding.PathToPoint(playerPos);
+		print("path length: "+path.Length);
 
 		// fill in positions
 		distance = 0;
-		//Debug.Log("path: "+path);
-		//Debug.Log("path length: "+path.Length);
 		positions = new Vector3[path.Length];
+		MazeGame temp = player.GetComponent<MazeGame>();
 		for (int i=0; i<positions.Length; ++i) {
 			Point3 p = path[i];
 			Vector3 v = mazeStruct.FromGameToCube(p);
-			if (is3D)
-				positions[i] = mazeStruct.Vector3FromCubeToSphere(v).normalized*(mazeStruct.radius-height);
-			else {
-				v = mazeStruct.Vector3FromCubeToSphere(v)*(mazeStruct.radius-height);
-			}
+			positions[i] = temp.EnforceHeight(mazeStruct.Vector3FromCubeToSphere(v), height);
 		}
 	}
 

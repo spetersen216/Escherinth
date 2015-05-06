@@ -153,6 +153,12 @@ public class Main : MonoBehaviour {
 	/// Shown when a level is completed.
 	/// </summary>
 	public void LevelEndMenu(bool victory) {
+		// handle total victory
+		if (victory && curLevel==levels.Length-1) {
+			CreditsMenu();
+			return;
+		}
+
 		HideMenus();
 		levelEnd.SetActive(true);
 		levelEnd.transform.Find("NextLevel").gameObject.SetActive(victory);

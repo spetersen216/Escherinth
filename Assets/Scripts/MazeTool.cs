@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEditor;
+//using UnityEditor;
 using System.Collections.Generic;
 using System;
 
@@ -8,12 +8,16 @@ using System;
 public class MazeTool:MonoBehaviour {
 	// change this code to enable builds
 	public GameObject activeGameObject {
-		get { return Selection.activeGameObject; }
-		set { Selection.activeGameObject = value; }
+		//get { return Selection.activeGameObject; }
+		get { return null; }
+		//set { Selection.activeGameObject = value; }
+		set { }
 	}
 	public bool isRunning {
-		get { return EditorApplication.isPlaying; }
+		//get { return EditorApplication.isPlaying; }
+		get { return false; }
 	}
+	
 	// maze variables
 	public int width=10;
 	public int height=10;

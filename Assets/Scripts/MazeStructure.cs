@@ -288,7 +288,7 @@ public class MazeStructure {
 			// calculate the result
 			v = floor.normalized*radius*(1-(v-floor).magnitude/length);
 		} else
-			v *= cellDist;
+			v.Scale(new Vector3(cellDist, cellDist/1.5f, cellDist));
 		return v;
 	}
 
@@ -316,7 +316,7 @@ public class MazeStructure {
 			else
 				v = floor+(height*Vector3.up);
 		} else
-			v /= cellDist;
+			v.Scale(new Vector3(1/cellDist, 1.5f/cellDist, 1/cellDist));
 		return v;
 	}
 
@@ -497,8 +497,14 @@ public class MazeStructure {
 
 		// handle torch
 		Point3 torchSide = (torches.ContainsKey(p)?torches[p]-p:Point3.zero);
-		if (torches.ContainsKey(p))
-			Debug.Log("torch at "+p+" is "+torches[p]);
+		if (torches.ContainsKey(p)) {
+			Debug.Log("xIndex: "+xIndex+"; yIndex: "+yIndex+"; zIndex: "+zIndex);
+			Debug.Log("torchside: "+torchSide);
+			int temp = torchSide[xIndex];
+			torchSide[xIndex] = torchSide[zIndex];
+			torchSide[zIndex] = temp;
+			Debug.Log("torchside: "+torchSide);
+		}
 
 		// create the MazeCell
 		MazeCell cell = new GameObject("MazeCell "+p.x+" "+p.y+" "+p.z+" ("+i+", "+j+") - "+cellWallIndex).AddComponent<MazeCell>();

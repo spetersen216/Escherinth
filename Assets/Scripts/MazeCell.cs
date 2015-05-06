@@ -36,15 +36,21 @@ public class MazeCell:MonoBehaviour {
 		wallTop.transform.parent = transform;
 
 		plane = new Plane(vectors.vy, vectors.v00);
-		children = new GameObject[] { floor, wall, wallTop };
+		children = new GameObject[]{floor, wall, wallTop};
+
+		// create new transformer
+		/*SquareTransformer temp = new SquareTransformer();
+		temp.v00 = vectors.v01;
+		temp.v01 = vectors.v10;
+		temp.v10 = vectors.v11;
+		temp.v11 = vectors.v00;
+		temp.vy = vectors.vy;*/
 
 		// place torch
-		/*if (torchSide!=Point3.zero) {
-			print("torchside: "+torchSide);
-			print("making torch");
+		if (torchSide!=Point3.zero) {
 			torch = (GameObject)Instantiate(mazeStruct.torchObj);
 			torch.transform.localScale = torch.transform.localScale*mazeStruct.cellDist;
-			Vector3 floorv = vectors.Translate((Vector3.one+torchSide.ToVector3())/2, false);
+			Vector3 floorv = vectors.Translate((Vector3.one+(torchSide.ToVector3()*0.95f))/2, false);
 			torch.transform.parent = transform;
 			torch.transform.position =
 				mazeStruct.Vector3FromCubeToSphere(vectors.Translate((Vector3.one+torchSide.ToVector3())/2, true), floorv);
@@ -62,19 +68,27 @@ public class MazeCell:MonoBehaviour {
 		}
 
 		// place door
-		if (doorSide!=Point3.zero) {
+		/*if (doorSide!=Point3.zero) {
 
 		}*/
 
 		// place endZone
 		if (end) {
+			// find cube mesh
+			GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			Mesh cMesh = cube.GetComponent<MeshFilter>().mesh;
+			Vector3[] verts = cMesh.vertices;
+			for (int i=0; i<verts.Length; ++i)
+				verts[i] = (verts[i]+new Vector3(-0.5f, 0.5f, -0.5f))/100;
+			cMesh.vertices = verts;
+
+			// create the endzone
 			GameObject endZone = new GameObject("EndZone");
+			MeshCollider col = endZone.AddComponent<MeshCollider>();
+			col.sharedMesh = Morph(cMesh, mazeStruct, vectors, false);
+			col.isTrigger = true;
 			endZone.transform.parent = transform;
-			BoxCollider box = endZone.AddComponent<BoxCollider>();
-			box.size = Vector3.one*mazeStruct.cellDist;
-			Vector3 floorv = vectors.Translate(Vector3.one/2, false);
-			box.center = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true), floorv);
-			box.isTrigger = true;
+			Destroy(cube);
 		}
 	}
 

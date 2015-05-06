@@ -41,6 +41,7 @@ public class MazeGame:MonoBehaviour {
 	public Monster monster;
 	public GameObject torchObj;
 	public GameObject doorObj;
+	private GameObject ceiling;
 	private MazeCell[, ,] cells;
 	private GameObject mazeSphere;
 	public Light cLight;
@@ -68,6 +69,10 @@ public class MazeGame:MonoBehaviour {
 		cells = mazeStruct.MakeCells(cellFloor, cellWalls, cellWallTops,
 			cellFloorMat, cellWallMat, cellWallTopMat, doorObj, lightFlicker, radius);
 
+		// remove old MazeTools
+		for (int i=0; i<tools.Length; ++i)
+			Destroy(tools[i].gameObject);
+
 		// initialize this
 		transform.position = mazeStruct.GetStartSphere();
 		skyboxMaterial = Resources.Load<Material>("Overcast2 Skybox");
@@ -82,7 +87,7 @@ public class MazeGame:MonoBehaviour {
 		collider.center = new Vector3(0, .4f, 0);
 
 		// initialize other objects
-		Vector3 keyPos = mazeStruct.FindKeySphere().normalized*(radius-keyHeight);
+		Vector3 keyPos = EnforceHeight(mazeStruct.FindKeySphere(), keyHeight);
 		Quaternion keyRot = Quaternion.LookRotation(Vector3.Cross(-keyPos, Vector3.one), -keyPos);
 		key = (Key)Instantiate(key, keyPos, keyRot);
 		cLight = ((GameObject)Instantiate(cLight.gameObject, cLight.gameObject.transform.localPosition, Quaternion.identity)).GetComponent<Light>();
@@ -115,13 +120,14 @@ public class MazeGame:MonoBehaviour {
 		}
 
 		// freeze position to 2D plane OR 3D sphere
-		if (is3D)
+		rigidbody.MovePosition(EnforceHeight(rigidbody.position, playerHeight));
+		/*if (is3D)
 			rigidbody.MovePosition(rigidbody.position.normalized*(radius-playerHeight));
 		else {
 			Vector3 v = rigidbody.position;
 			v[1] = playerHeight;
 			rigidbody.MovePosition(v);
-		}
+		}*/
 
 		// sum the forward/backward movement
 		float forward = 0;
@@ -162,7 +168,8 @@ public class MazeGame:MonoBehaviour {
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
 			//Time.timeScale = 0;
-			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.2f;
+			if (isScary)
+				GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.2f;
 			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
 			lights.keyTime = 0;
@@ -171,18 +178,25 @@ public class MazeGame:MonoBehaviour {
 			this.lamp.gameObject.SetActive(true);
 			monster.Init(main, mazeStruct, cells, transform, mazeStruct.GetMonsterSphere(), monsterSpeed, monsterHeight, is3D);
 
-			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			sphere.transform.localScale = new Vector3(96.8f, 96.8f, 96.8f);
-			sphere.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
-			sphere.renderer.material.color = new Color(1, 1, 1, 0.8f);
+			// create ceiling
+			if (is3D) {
+				ceiling = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+				ceiling.transform.localScale = Vector3.one*(2*radius-mazeStruct.cellDist);
+			} else {
+				ceiling = GameObject.CreatePrimitive(PrimitiveType.Cube);
+				ceiling.transform.localScale = Vector3.one*(2*radius);
+				ceiling.transform.localPosition = new Vector3(radius, radius+mazeStruct.cellDist/1.5f, radius);
+			}
+			ceiling.renderer.material = new Material(Shader.Find("Transparent/Diffuse"));
+			ceiling.renderer.material.color = new Color(1, 1, 1, 0.8f);
+
 		}
 		if (collider.GetComponent<Lamp>() == lamp) {
 			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.0f;
 			collider.gameObject.SetActive(false);
 			this.lantern.SetActive(true);
 			Light[] l = this.lantern.GetComponentsInChildren<Light>();
-
-			GameObject.Find("Sphere").renderer.material.color = new Color(0,0,0,.8f);
+			ceiling.renderer.material.color = new Color(0,0,0,.8f);
 
 			foreach(Light light in l){
 				if(light.enabled == false){
@@ -194,10 +208,43 @@ public class MazeGame:MonoBehaviour {
 			}
 		}
 
-		/*if (collider.name=="EndZone") {
-			main.LevelEndMenu(true);
+		if (collider.name=="EndZone") {
+			main.Show(()=>main.LevelEndMenu(true));
 			print("destroying");
 			Destroy(gameObject);
-		}*/
+		}
+	}
+
+	public Vector3 EnforceHeight(Vector3 v, float height) {
+		if (is3D)
+			return v.normalized*(radius-height);
+		v[1] = height;
+		return v;
+	}
+
+	void OnDestroy() {
+		TryDestroy(lights);
+		TryDestroy(key);
+		TryDestroy(lamp);
+		TryDestroy(lantern);
+		TryDestroy(cLight);
+		TryDestroy(ceiling);
+		TryDestroy(monster);
+		try {
+			TryDestroy(cells[1, 1, 1].transform.parent.parent.gameObject);
+		} catch { print("didn't destroy the maze cells"); }
+	}
+
+	private void TryDestroy(Object obj) {
+		try {
+			if (ReferenceEquals(obj, null))
+				return;
+			if (obj is Component)
+				Destroy(((Component)obj).gameObject);
+			if (obj is GameObject)
+				Destroy((GameObject)obj);
+		} catch {
+			print("error destroying: "+obj);
+		}
 	}
 }
