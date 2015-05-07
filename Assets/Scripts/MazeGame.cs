@@ -168,20 +168,22 @@ public class MazeGame:MonoBehaviour {
 		// We want to check if the thing we're colliding with is a collectable, this will differentiate it from other trigger objects which we might add in the future
 		if (collider.GetComponent<Key>() == key) {
 			//Time.timeScale = 0;
-			if (isScary)
+			if (isScary) {
 				GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.2f;
+				lights.keyTime = 0;
+				monster.Init(main, mazeStruct, cells, transform, mazeStruct.GetMonsterSphere(), monsterSpeed, monsterHeight, is3D);
+			}// else
+				//mazeStruct.lightenCells();
+			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
 			mazeStruct.RemoveDoor();
 			collider.gameObject.SetActive(false);
-			lights.keyTime = 0;
-			//print(skyboxMaterial.GetColor("_Tint"));
-			skyboxMaterial.SetColor("_Tint", new Color32((byte)44, (byte)28, (byte)53, (byte)128));
 			this.lamp.gameObject.SetActive(true);
-			monster.Init(main, mazeStruct, cells, transform, mazeStruct.GetMonsterSphere(), monsterSpeed, monsterHeight, is3D);
 
 			// create ceiling
 			if (is3D) {
 				ceiling = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-				ceiling.transform.localScale = Vector3.one*(2*radius-mazeStruct.cellDist);
+				ceiling.transform.localScale = Vector3.one*(0.5f+2*radius-mazeStruct.cellDist);
+				print("0.5f+2*radius-mazeStruct.cellDist: "+(0.5f+2*radius-mazeStruct.cellDist));
 			} else {
 				ceiling = GameObject.CreatePrimitive(PrimitiveType.Cube);
 				ceiling.transform.localScale = Vector3.one*(2*radius);
@@ -192,7 +194,8 @@ public class MazeGame:MonoBehaviour {
 
 		}
 		if (collider.GetComponent<Lamp>() == lamp) {
-			GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.0f;
+			if (isScary)
+				GameObject.Find("CenterLight(Clone)").GetComponent<Light>().intensity = 0.0f;
 			collider.gameObject.SetActive(false);
 			this.lantern.SetActive(true);
 			Light[] l = this.lantern.GetComponentsInChildren<Light>();

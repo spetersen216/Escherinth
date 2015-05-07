@@ -12,11 +12,13 @@ public class LightSystem:MonoBehaviour {
 	private Pathfinding path;
 	public String test;
 	private AudioSource sound;
+	private MazeStructure mazeStruct;
 
 	public void Init(MazeStructure mazeStruct, MazeCell[,,] cells, AudioSource lightOff) {
 		this.cells = cells;
 		this.path = mazeStruct.Pathfind(mazeStruct.FindKey()[0]);
 		this.sound = lightOff;
+		this.mazeStruct = mazeStruct;
 	}
 
 
@@ -40,6 +42,8 @@ public class LightSystem:MonoBehaviour {
 					}
 				}
 			}
+			Point3 p = mazeStruct.EndPos();
+			cells[p.x, p.y, p.z].SetBrightness(new Color(1, 1, 1, 1));
 		}
 	}
 

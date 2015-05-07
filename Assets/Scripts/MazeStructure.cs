@@ -148,8 +148,8 @@ public class MazeStructure {
 		GameObject obj0 = cells[gpts[0].x, gpts[0].y, gpts[0].z].gameObject;
 		GameObject obj1 = cells[gpts[1].x, gpts[1].y, gpts[1].z].gameObject;
 		data[door.x, door.y, door.z] = false;
-		cells[gpts[0].x, gpts[0].y, gpts[0].z] = MakeMazeCell(dpts[0], obj0.transform.parent.gameObject);
-		cells[gpts[1].x, gpts[1].y, gpts[1].z] = MakeMazeCell(dpts[1], obj1.transform.parent.gameObject);
+		cells[gpts[0].x, gpts[0].y, gpts[0].z] = MakeMazeCell(dpts[0], obj0.transform.parent.gameObject, true);
+		cells[gpts[1].x, gpts[1].y, gpts[1].z] = MakeMazeCell(dpts[1], obj1.transform.parent.gameObject, true);
 		GameObject.Destroy(obj0);
 		GameObject.Destroy(obj1);
 	}
@@ -214,6 +214,10 @@ public class MazeStructure {
 		return Point3FromDataToGame(key);
 	}
 
+	public Point3 EndPos() {
+		return Point3FromDataToGame(endPos)[0];
+	}
+
 	/// <summary>
 	/// Transforms a Point3 from data-space to game-space.
 	/// If the Point3 is representable by a single Point3, it returns the single Point3.
@@ -226,9 +230,13 @@ public class MazeStructure {
 			p2.x += 1;
 			p.x -= 1;
 		}
-		if (p.y%2==0) {
+		else if (p.y%2==0) {
 			p2.y += 1;
 			p.y -= 1;
+		}
+		else if (p.z%2==0) {
+			p2.z += 1;
+			p.z -= 1;
 		}
 		if (p==p2)
 			return new Point3[] { (p+1)/2 };
@@ -391,7 +399,7 @@ public class MazeStructure {
 		return result;
 	}
 
-	private MazeCell MakeMazeCell(Point3 p, GameObject parent) {
+	private MazeCell MakeMazeCell(Point3 p, GameObject parent, bool noDoor=false) {
 		// find variables
 		int yIndex;
 		if (p.y==1||p.y==data.GetLength(1)-2)
@@ -489,21 +497,29 @@ public class MazeStructure {
 		// handle door
 		Point3 doorSide = Point3.zero;
 		Point3[] gpts = Point3FromDataToGame(door);
+		Debug.Log(gpts.Length);
+		for (int ii=0; ii<gpts.Length; ++ii)
+			Debug.Log("gpts[i] = "+gpts[ii]);
 		Point3[] dpts = new Point3[2];
 		dpts[0] = Point3FromGameToData(new Point3[]{gpts[0]});
 		dpts[1] = Point3FromGameToData(new Point3[]{gpts[1]});
-		if (p==dpts[0] || p==dpts[1])
+		if ((p==dpts[0] || p==dpts[1]) && !noDoor) {
 			doorSide = (dpts[0]+dpts[1])/2 - p;
+			Point3 temp = new Point3();
+			temp[0] = doorSide[xIndex];
+			temp[1] = doorSide[yIndex];
+			temp[2] = doorSide[zIndex];
+			doorSide = temp;
+		}
 
 		// handle torch
 		Point3 torchSide = (torches.ContainsKey(p)?torches[p]-p:Point3.zero);
 		if (torches.ContainsKey(p)) {
-			Debug.Log("xIndex: "+xIndex+"; yIndex: "+yIndex+"; zIndex: "+zIndex);
-			Debug.Log("torchside: "+torchSide);
-			int temp = torchSide[xIndex];
-			torchSide[xIndex] = torchSide[zIndex];
-			torchSide[zIndex] = temp;
-			Debug.Log("torchside: "+torchSide);
+			Point3 temp = new Point3();
+			temp[0] = torchSide[xIndex];
+			temp[1] = torchSide[yIndex];
+			temp[2] = torchSide[zIndex];
+			torchSide = temp;
 		}
 
 		// create the MazeCell

@@ -72,6 +72,7 @@ public class Monster:MonoBehaviour {
 				temp[1] = temp[2]-1*Vector3.up;
 			}
 			positions = temp;
+			path = temp2;
 		}
 
 		// if the monster and player are in the same cell

@@ -7,6 +7,7 @@ public class MazeCell:MonoBehaviour {
 	private GameObject wall;
 	private GameObject wallTop;
 	private GameObject torch;
+	private GameObject door;
 	private GameObject[] children;
 	public Plane plane;
 
@@ -38,28 +39,23 @@ public class MazeCell:MonoBehaviour {
 		plane = new Plane(vectors.vy, vectors.v00);
 		children = new GameObject[]{floor, wall, wallTop};
 
-		// create new transformer
-		/*SquareTransformer temp = new SquareTransformer();
-		temp.v00 = vectors.v01;
-		temp.v01 = vectors.v10;
-		temp.v10 = vectors.v11;
-		temp.v11 = vectors.v00;
-		temp.vy = vectors.vy;*/
-
 		// place torch
 		if (torchSide!=Point3.zero) {
+			Vector3 toVec = torchSide.ToVector3()*0.4f;
+			Vector3 middle = new Vector3(1, 1+(mazeStruct.is3D?0.1f:0), 1)/2;
 			torch = (GameObject)Instantiate(mazeStruct.torchObj);
 			torch.transform.localScale = torch.transform.localScale*mazeStruct.cellDist;
-			Vector3 floorv = vectors.Translate((Vector3.one+(torchSide.ToVector3()*0.95f))/2, false);
+			Vector3 floorv = vectors.Translate(middle+toVec, false);
 			torch.transform.parent = transform;
 			torch.transform.position =
-				mazeStruct.Vector3FromCubeToSphere(vectors.Translate((Vector3.one+torchSide.ToVector3())/2, true), floorv);
-			floorv = vectors.Translate(Vector3.one/2, false);
-			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(Vector3.one/2, true), floorv);
+				mazeStruct.Vector3FromCubeToSphere(vectors.Translate(middle+toVec, true), floorv);
+			floorv = vectors.Translate(middle, false);
+			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(middle, true), floorv);
 
 			// rotate the torch
 			Vector3 up = (mazeStruct.is3D?-torch.transform.position.normalized:Vector3.up);
 			Vector3 forward = (v-torch.transform.position).normalized;
+			forward = Vector3.Cross(forward, up);
 			if (Vector3.Angle(forward, up)<90)
 				forward = Vector3.RotateTowards(-up, forward, Mathf.PI/2, 0);
 			else
@@ -68,9 +64,27 @@ public class MazeCell:MonoBehaviour {
 		}
 
 		// place door
-		/*if (doorSide!=Point3.zero) {
+		if (doorSide!=Point3.zero) {
+			Vector3 toVec = doorSide.ToVector3()*0.397f;
+			Vector3 middle = new Vector3(1, 0, 1)/2;
+			door = (GameObject)Instantiate(mazeStruct.doorObj);
+			door.transform.localScale = door.transform.localScale*mazeStruct.cellDist;
+			Vector3 floorv = vectors.Translate(middle+toVec, false);
+			door.transform.parent = transform;
+			door.transform.position =
+				mazeStruct.Vector3FromCubeToSphere(vectors.Translate(middle+toVec, true), floorv);
+			floorv = vectors.Translate(middle, false);
+			Vector3 v = mazeStruct.Vector3FromCubeToSphere(vectors.Translate(middle, true), floorv);
 
-		}*/
+			// rotate the door
+			Vector3 up = (mazeStruct.is3D?-door.transform.position.normalized:Vector3.up);
+			Vector3 forward = -(v-door.transform.position).normalized;
+			if (Vector3.Angle(forward, up)<90)
+				forward = Vector3.RotateTowards(-up, forward, Mathf.PI/2, 0);
+			else
+				forward = Vector3.RotateTowards(up, forward, Mathf.PI/2, 0);
+			door.transform.rotation = Quaternion.LookRotation(forward, up);
+		}
 
 		// place endZone
 		if (end) {
