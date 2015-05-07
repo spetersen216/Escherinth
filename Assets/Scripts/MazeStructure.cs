@@ -497,9 +497,6 @@ public class MazeStructure {
 		// handle door
 		Point3 doorSide = Point3.zero;
 		Point3[] gpts = Point3FromDataToGame(door);
-		Debug.Log(gpts.Length);
-		for (int ii=0; ii<gpts.Length; ++ii)
-			Debug.Log("gpts[i] = "+gpts[ii]);
 		Point3[] dpts = new Point3[2];
 		dpts[0] = Point3FromGameToData(new Point3[]{gpts[0]});
 		dpts[1] = Point3FromGameToData(new Point3[]{gpts[1]});

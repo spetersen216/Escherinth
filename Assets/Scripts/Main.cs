@@ -45,13 +45,14 @@ public class Main : MonoBehaviour {
 			RectTransform button = (RectTransform)Instantiate(template);
 			button.parent = scrollArea;
 			Text text = button.GetChild(0).GetComponent<Text>();
-			text.text = "Level "+i+" ("+(levels[i].isScary?"scary":"plain")+") ("+(levels[i].is3D?"3D":"2D")+")";
+			text.text = "Level "+(i+1)+" ("+(levels[i].isScary?"scary":"plain")+") ("+(levels[i].is3D?"3D":"2D")+")";
 			RectTransform rect = (RectTransform)button;
 			button.anchoredPosition = new Vector2(template.anchoredPosition.x, template.anchoredPosition.y-40*(i+1));
 			Button.ButtonClickedEvent onClick = new Button.ButtonClickedEvent();
 			int tmpi = i;
 			onClick.AddListener(()=>PlayLevel(tmpi));
 			button.GetComponent<Button>().onClick = onClick;
+			
 		}//*/
 	}
 
@@ -59,6 +60,46 @@ public class Main : MonoBehaviour {
 		if (nextFrame!=null)
 			nextFrame();
 		nextFrame = null;
+
+		// handle menu
+		if (main.activeInHierarchy) {
+			if (Input.GetKey(KeyCode.P))
+				Play();
+			if (Input.GetKey(KeyCode.E))
+				Quit();
+			if (Input.GetKey(KeyCode.L))
+				LevelSelectMenu();
+			if (Input.GetKey(KeyCode.C))
+				CreditsMenu();
+		} else if (pause.activeInHierarchy) {
+			if (Input.GetKey(KeyCode.P))
+				Play();
+			if (Input.GetKey(KeyCode.M))
+				MainMenu();
+		} else if (levelSelect.activeInHierarchy) {
+			if (Input.GetKey(KeyCode.B))
+				MainMenu();
+			if (Input.GetKey(KeyCode.Alpha1))
+				PlayLevel(0);
+			if (Input.GetKey(KeyCode.Alpha2))
+				PlayLevel(1);
+			if (Input.GetKey(KeyCode.Alpha3))
+				PlayLevel(2);
+			if (Input.GetKey(KeyCode.Alpha4))
+				PlayLevel(3);
+		} else if (levelEnd.activeInHierarchy) {
+			if (Input.GetKey(KeyCode.R))
+				Restart();
+			if (Input.GetKey(KeyCode.M))
+				MainMenu();
+			if (Input.GetKey(KeyCode.L))
+				LevelSelectMenu();
+			if (Input.GetKey(KeyCode.N))
+				Play();
+		} else if (credits.activeInHierarchy) {
+			if (Input.GetKey(KeyCode.M))
+				MainMenu();
+		}
 	}
 
 	/// <summary>

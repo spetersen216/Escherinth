@@ -103,6 +103,17 @@ public class MazeCell:MonoBehaviour {
 			col.isTrigger = true;
 			endZone.transform.parent = transform;
 			Destroy(cube);
+			
+			// change floor texture
+			Texture2D tex = floor.renderer.material.mainTexture as Texture2D;
+			Texture2D newTex = new Texture2D(tex.width, tex.height);
+			for (int i=0; i<tex.width; ++i) {
+				for (int j=0; j<tex.height; ++j) {
+					Color c = tex.GetPixel(i, j);
+					newTex.SetPixel(i, j, new Color(c.r/4, c.g/4, c.b/4));
+				}
+			}
+			floor.renderer.material.mainTexture = newTex;
 		}
 	}
 
